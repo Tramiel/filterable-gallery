@@ -58,6 +58,9 @@
             console.log('Nombre de galeries trouvées:', document.querySelectorAll('.custom_gallery_component').length);
             const images = JSON.parse(container.getAttribute('data-gallery'));
             const categories = JSON.parse(container.getAttribute('data-categories'));
+            //ajout de console.log
+            console.log('Images:', images);
+            console.log('Categories:', categories);
 
             // Génère la galerie
             container.innerHTML = `
