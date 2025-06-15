@@ -1,4 +1,6 @@
 (function(){
+    //Ajout de console.log
+    console.log('gallery-widget.js chargé');
     // Injecte MixItUp depuis CDN
     var mixitupScript = document.createElement('script');
     mixitupScript.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
@@ -49,7 +51,11 @@
 
     // Initialisation après chargement de MixItUp
     mixitupScript.onload = function() {
+        //ajout de console.log
+        console.log('Recherche des .custom_gallery_component');
         document.querySelectorAll('.custom_gallery_component').forEach(container => {
+            //ajout de console.log
+            console.log('Nombre de galeries trouvées:', document.querySelectorAll('.custom_gallery_component').length);
             const images = JSON.parse(container.getAttribute('data-gallery'));
             const categories = JSON.parse(container.getAttribute('data-categories'));
 
