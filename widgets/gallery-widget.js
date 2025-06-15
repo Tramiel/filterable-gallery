@@ -56,6 +56,9 @@
         document.querySelectorAll('.custom_gallery_component').forEach(container => {
             //ajout de console.log
             console.log('Nombre de galeries trouvées:', document.querySelectorAll('.custom_gallery_component').length);
+            // ajout de console.log
+            console.log('Attribut data-gallery:', container.getAttribute('data-gallery'));
+            console.log('Attribut data-categories:', container.getAttribute('data-categories'));
             const images = JSON.parse(container.getAttribute('data-gallery'));
             const categories = JSON.parse(container.getAttribute('data-categories'));
             //ajout de console.log
