@@ -66,7 +66,10 @@
             console.log('Categories:', categories);
 
             // Génère la galerie
+            // Log des propriétés de chaque image
+            images.forEach((img, i) => {
             console.log('img.src:', img.src, 'img.thumb:', img.thumb);
+            });
             container.innerHTML = `
                 <div class="custom-gallery-filters">
                     <button data-filter="all" class="active">Tout</button>
