@@ -79,6 +79,7 @@
                     `).join('')}
                 </div>
             `;
+            console.log('HTML généré pour la galerie:', container.innerHTML);
 
             // Initialise MixItUp
             const mixer = mixitup(container.querySelector('.custom-gallery-grid'), {
