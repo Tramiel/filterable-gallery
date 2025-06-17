@@ -17,7 +17,7 @@
 .custom-gallery-filters button { margin:0 10px; padding:8px 20px; background:#f0f0f0; border:1px solid #ddd; cursor:pointer; border-radius:5px; transition:background 0.2s; }
 .custom-gallery-filters button.active, .custom-gallery-filters button:hover { background:#e0e0e0; }
 .mix { position:relative; overflow:hidden; }
-.mix img { width:100%; height:140px; object-fit:cover; border-radius:5px; cursor:pointer; transition:transform 0.2s; }
+.mix img { width:100%; aspect-ratio: 4/3; object-fit:cover; border-radius:5px; cursor:pointer; transition:transform 0.2s; }
 .mix img:hover { transform:scale(1.04); }
 .custom-lightbox-overlay { display:none; position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:999999!important; flex-direction:column; }
 .custom-lightbox-overlay.active { display:flex; }
