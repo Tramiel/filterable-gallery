@@ -19,9 +19,9 @@
 .mix { position:relative; overflow:hidden; }
 .mix img { width:100%; aspect-ratio: 4/3; object-fit:cover; border-radius:5px; cursor:pointer; transition:transform 0.2s; }
 .mix img:hover { transform:scale(1.04); }
-.custom-lightbox-overlay { display:none; position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:999999!important; flex-direction:column; }
+.custom-lightbox-overlay { display:none; position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:2147483647!important; flex-direction:column; }
 .custom-lightbox-overlay.active { display:flex; }
-.custom-lightbox-img { max-width:90vw; max-height:60vh; object-fit:contain; border-radius:8px; box-shadow:0 0 30px #111; display:block; margin:0 auto; }
+.custom-lightbox-img { max-width:90vw; max-height:90vh; object-fit:contain; border-radius:8px; box-shadow:0 0 30px #111; display:block; margin:0 auto; }
 .custom-lightbox-thumbs { margin-top:10px; text-align:center; }
 .custom-thumb { width:50px; margin:0 2px; border-radius:4px; cursor:pointer; opacity:0.7; border:2px solid transparent; transition:opacity 0.2s, border 0.2s; }
 .custom-thumb.active, .custom-thumb:hover { opacity:1; border:2px solid #fff; }
@@ -82,6 +82,8 @@
                 const overlay = document.createElement('div');
                 overlay.id = 'global-lightbox';
                 overlay.className = 'custom-lightbox-overlay';
+                // Ajoutez ceci pour contrer d'éventuels styles parent
+                overlay.style.cssText = 'position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important;';
                 overlay.innerHTML = `
                     <button class="custom-lightbox-arrow prev">❮</button>
                     <img class="custom-lightbox-img" src="" alt="">
