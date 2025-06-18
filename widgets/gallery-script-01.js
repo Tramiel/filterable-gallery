@@ -375,36 +375,67 @@
         galleryItems.forEach((item, index) => {
           const isVisible = currentFilter === 'all' || item.classList.contains(currentFilter);
           if (isVisible) {
-            visibleItems.push({ item, index });
+            visibleItems.push({ item, index, rect: itemRects[index] });
           } else {
-            hiddenItems.push({ item, index });
+            hiddenItems.push({ item, index, rect: itemRects[index] });
           }
         });
 
-        // Appliquer les transformations initiales
-        visibleItems.forEach(({ item }, idx) => {
-          const currentRect = itemRects[visibleItems[idx].index];
+        // Désactiver les transitions pour positionnement initial
+        galleryItems.forEach(item => {
+          item.style.transition = 'none';
           item.style.position = 'relative';
-          item.style.transform = `translate(0, 0)`;
+        });
+
+        // Appliquer les positions initiales
+        visibleItems.forEach(({ item, rect }) => {
+          const dx = rect.left - gridRect.left;
+          item.style.transform = `translateX(${dx}px)`;
           item.style.opacity = '1';
           item.classList.remove('hidden');
         });
 
-        hiddenItems.forEach(({ item }) => {
-          item.style.transform = `translateY(20px)`;
+        hiddenItems.forEach(({ item, rect }) => {
+          const dx = rect.left - gridRect.left;
+          item.style.transform = `translateX(${dx}px)`;
           item.style.opacity = '0';
-          item.classList.add('hidden');
         });
 
-        // Animer le repositionnement
+        // Forcer le reflow
+        galleryContainer.querySelector('.gallery-grid').offsetHeight;
+
+        // Activer les transitions et animer vers les nouvelles positions
         requestAnimationFrame(() => {
-          visibleItems.forEach(({ item }, idx) => {
+          galleryItems.forEach(item => {
             item.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-            item.style.transform = `translate(0, 0)`;
+          });
+
+          visibleItems.forEach(({ item }, idx) => {
+            item.style.transform = 'translateX(0)';
             item.style.opacity = '1';
           });
-          // Forcer le reflow
-          galleryContainer.querySelector('.gallery-grid').offsetHeight;
+
+          hiddenItems.forEach(({ item }) => {
+            item.style.transform = 'translateX(0)';
+            item.style.opacity = '0';
+          });
+
+          // Après l'animation, masquer les éléments cachés
+          setTimeout(() => {
+            hiddenItems.forEach(({ item }) => {
+              item.classList.add('hidden');
+              item.style.transform = '';
+              item.style.opacity = '';
+            });
+            visibleItems.forEach(({ item }) => {
+              item.style.transform = '';
+              item.style.opacity = '';
+            });
+            galleryItems.forEach(item => {
+              item.style.transition = '';
+              item.style.position = '';
+            });
+          }, 300);
         });
       });
     });
