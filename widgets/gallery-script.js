@@ -7,10 +7,10 @@
       return;
     }
 
-    // Vérifier si dans une iframe
-    if (window.self !== window.top) {
-      console.warn('Module dans une iframe. Le plein écran peut être confiné.');
-    }
+    // Détecter si dans une iframe
+    const isInIframe = window.self !== window.top;
+    const targetDocument = isInIframe ? window.parent.document : document;
+    const targetBody = targetDocument.body;
 
     // Injecter le CSS
     const style = document.createElement('style');
@@ -44,10 +44,21 @@
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 10px;
         padding: 20px;
+        transition: all 0.3s ease;
       }
       .gallery-item {
         position: relative;
         border-radius: 5px;
+        overflow: hidden;
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      .gallery-item.hidden {
+        opacity: 0;
+        transform: translateY(20px);
+        height: 0;
+        margin: 0;
         overflow: hidden;
       }
       .gallery-item img {
@@ -57,20 +68,10 @@
         display: block;
         border-radius: 5px;
         cursor: pointer;
-        transition: transform 0.3s;
+        transition: transform 0.3s ease;
       }
       .gallery-item:hover img {
         transform: scale(1.05);
-      }
-      .gallery-item.visible {
-        opacity: 1;
-        transform: translateY(0);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-      }
-      .gallery-item:not(.visible) {
-        opacity: 0;
-        transform: translateY(20px);
-        display: none;
       }
       .filter-button[aria-selected="true"] {
         font-weight: bold;
@@ -147,7 +148,7 @@
         }
       }
     `;
-    document.head.appendChild(style);
+    targetDocument.head.appendChild(style);
 
     // Injecter le HTML
     galleryContainer.innerHTML = `
@@ -157,19 +158,19 @@
         <button class="filter-button" data-filter="soiree" role="tab" aria-selected="false">Coiffures de soirée</button>
       </div>
       <div class="gallery-grid">
-        <div class="gallery-item mariage visible">
+        <div class="gallery-item mariage">
           <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250" 
                data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224"
                alt="Coiffure élégante pour mariage" 
                title="Coiffure élégante pour mariage">
         </div>
-        <div class="gallery-item soiree visible">
+        <div class="gallery-item soiree">
           <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250" 
                data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224"
                alt="Coiffure glamour pour soirée" 
                title="Coiffure glamour pour soirée">
         </div>
-        <div class="gallery-item mariage visible">
+        <div class="gallery-item mariage">
           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250" 
                data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224"
                alt="Coiffure romantique pour mariage" 
@@ -178,10 +179,10 @@
       </div>
     `;
 
-    // Créer le lightbox
-    let lightbox = document.querySelector('.lightbox-overlay');
+    // Créer le lightbox dans le DOM parent
+    let lightbox = targetDocument.querySelector('.lightbox-overlay');
     if (!lightbox) {
-      lightbox = document.createElement('div');
+      lightbox = targetDocument.createElement('div');
       lightbox.className = 'lightbox-overlay';
       lightbox.id = 'global-lightbox';
       lightbox.innerHTML = `
@@ -189,7 +190,7 @@
         <img class="lightbox-img" src="" alt="">
         <button class="lightbox-arrow next" title="Suivante">→</button>
       `;
-      document.body.appendChild(lightbox);
+      targetBody.appendChild(lightbox);
     }
 
     // Initialisation du filtrage
@@ -208,11 +209,9 @@
         const filterValue = this.getAttribute('data-filter');
         galleryItems.forEach(item => {
           if (filterValue === 'all' || item.classList.contains(filterValue)) {
-            item.style.display = 'block';
-            setTimeout(() => item.classList.add('visible'), 10);
+            item.classList.remove('hidden');
           } else {
-            item.classList.remove('visible');
-            setTimeout(() => item.style.display = 'none', 300);
+            item.classList.add('hidden');
           }
         });
       });
@@ -225,7 +224,7 @@
     let currentIndex = 0;
 
     function getVisibleImages() {
-      return Array.from(galleryItems).filter(item => item.classList.contains('visible'));
+      return Array.from(galleryItems).filter(item => !item.classList.contains('hidden'));
     }
 
     function showLightbox(index) {
@@ -235,7 +234,7 @@
       lightboxImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       lightboxImg.alt = visibleImages[currentIndex].querySelector('img').alt;
       lightbox.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      targetBody.style.overflow = 'hidden';
     }
 
     galleryItems.forEach((item, idx) => {
@@ -251,7 +250,7 @@
     function closeLightbox() {
       lightbox.classList.remove('active');
       lightboxImg.src = '';
-      document.body.style.overflow = '';
+      targetBody.style.overflow = '';
     }
 
     function showPrev() {
@@ -283,11 +282,21 @@
     });
 
     // Navigation clavier
-    document.addEventListener('keydown', (e) => {
+    targetDocument.addEventListener('keydown', (e) => {
       if (!lightbox.classList.contains('active')) return;
       if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') showPrev();
       if (e.key === 'ArrowRight') showNext();
     });
+
+    // Ajuster la hauteur de l'iframe
+    if (isInIframe) {
+      const updateHeight = () => {
+        const height = galleryContainer.offsetHeight;
+        window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
+      };
+      new ResizeObserver(updateHeight).observe(galleryContainer);
+      updateHeight();
+    }
   });
 })();
