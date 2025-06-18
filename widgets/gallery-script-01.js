@@ -49,14 +49,15 @@
       }
       .gallery-grid {
         display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-        column-gap: 10px !important;
-        row-gap: 10px !important;
+        grid-template-columns: repeat(auto-fill, 250px) !important;
+        column-gap: 15px !important;
+        row-gap: 15px !important;
         padding: 20px !important;
         justify-content: start !important;
       }
       .gallery-item {
         position: relative;
+        width: 250px !important;
         border-radius: 5px;
         overflow: hidden;
         opacity: 1;
@@ -176,7 +177,10 @@
       }
       @media (max-width: 768px) {
         .gallery-grid {
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+          grid-template-columns: repeat(auto-fill, 150px) !important;
+        }
+        .gallery-item {
+          width: 150px !important;
         }
         .filter-button {
           padding: 8px 15px !important;
@@ -361,27 +365,43 @@
         this.setAttribute('aria-selected', 'true');
 
         currentFilter = this.getAttribute('data-filter');
-        galleryItems.forEach(item => {
+
+        // Calculer les positions initiales
+        const gridRect = galleryContainer.querySelector('.gallery-grid').getBoundingClientRect();
+        const itemRects = Array.from(galleryItems).map(item => item.getBoundingClientRect());
+        const visibleItems = [];
+        const hiddenItems = [];
+
+        galleryItems.forEach((item, index) => {
           const isVisible = currentFilter === 'all' || item.classList.contains(currentFilter);
           if (isVisible) {
-            item.classList.remove('hidden');
-            item.style.transform = 'translate(0, 0)';
-            item.style.opacity = '1';
+            visibleItems.push({ item, index });
           } else {
-            item.classList.add('hidden');
-            item.style.transform = 'translateY(20px)';
-            item.style.opacity = '0';
+            hiddenItems.push({ item, index });
           }
+        });
+
+        // Appliquer les transformations initiales
+        visibleItems.forEach(({ item }, idx) => {
+          const currentRect = itemRects[visibleItems[idx].index];
+          item.style.position = 'relative';
+          item.style.transform = `translate(0, 0)`;
+          item.style.opacity = '1';
+          item.classList.remove('hidden');
+        });
+
+        hiddenItems.forEach(({ item }) => {
+          item.style.transform = `translateY(20px)`;
+          item.style.opacity = '0';
+          item.classList.add('hidden');
         });
 
         // Animer le repositionnement
         requestAnimationFrame(() => {
-          galleryItems.forEach(item => {
-            if (!item.classList.contains('hidden')) {
-              item.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-              item.style.transform = 'translate(0, 0)';
-              item.style.opacity = '1';
-            }
+          visibleItems.forEach(({ item }, idx) => {
+            item.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+            item.style.transform = `translate(0, 0)`;
+            item.style.opacity = '1';
           });
           // Forcer le reflow
           galleryContainer.querySelector('.gallery-grid').offsetHeight;
