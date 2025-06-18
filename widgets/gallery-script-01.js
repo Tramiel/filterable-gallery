@@ -61,11 +61,16 @@
         border-radius: 5px;
         overflow: hidden;
         opacity: 1;
-        transform: translate(0, 0);
-        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: translateY(0);
+        transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease;
       }
       .gallery-item.hidden {
-        display: none !important;
+        opacity: 0;
+        transform: translateY(20px);
+        height: 0;
+        margin: 0;
+        overflow: hidden;
+        pointer-events: none;
       }
       .gallery-item img {
         width: 100% !important;
@@ -366,76 +371,20 @@
 
         currentFilter = this.getAttribute('data-filter');
 
-        // Calculer les positions initiales
-        const gridRect = galleryContainer.querySelector('.gallery-grid').getBoundingClientRect();
-        const itemRects = Array.from(galleryItems).map(item => item.getBoundingClientRect());
-        const visibleItems = [];
-        const hiddenItems = [];
-
-        galleryItems.forEach((item, index) => {
+        galleryItems.forEach(item => {
           const isVisible = currentFilter === 'all' || item.classList.contains(currentFilter);
           if (isVisible) {
-            visibleItems.push({ item, index, rect: itemRects[index] });
+            item.classList.remove('hidden');
           } else {
-            hiddenItems.push({ item, index, rect: itemRects[index] });
+            item.classList.add('hidden');
           }
         });
 
-        // Désactiver les transitions pour positionnement initial
-        galleryItems.forEach(item => {
-          item.style.transition = 'none';
-          item.style.position = 'relative';
-        });
-
-        // Appliquer les positions initiales
-        visibleItems.forEach(({ item, rect }) => {
-          const dx = rect.left - gridRect.left;
-          item.style.transform = `translateX(${dx}px)`;
-          item.style.opacity = '1';
-          item.classList.remove('hidden');
-        });
-
-        hiddenItems.forEach(({ item, rect }) => {
-          const dx = rect.left - gridRect.left;
-          item.style.transform = `translateX(${dx}px)`;
-          item.style.opacity = '0';
-        });
-
-        // Forcer le reflow
-        galleryContainer.querySelector('.gallery-grid').offsetHeight;
-
-        // Activer les transitions et animer vers les nouvelles positions
+        // Animation fluide via transitions CSS
         requestAnimationFrame(() => {
           galleryItems.forEach(item => {
-            item.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+            item.style.transition = 'opacity 0.3s ease, transform 0.3s ease, height 0.3s ease';
           });
-
-          visibleItems.forEach(({ item }, idx) => {
-            item.style.transform = 'translateX(0)';
-            item.style.opacity = '1';
-          });
-
-          hiddenItems.forEach(({ item }) => {
-            item.style.transform = 'translateX(0)';
-            item.style.opacity = '0';
-          });
-
-          // Après l'animation, masquer les éléments cachés
-          setTimeout(() => {
-            hiddenItems.forEach(({ item }) => {
-              item.classList.add('hidden');
-              item.style.transform = '';
-              item.style.opacity = '';
-            });
-            visibleItems.forEach(({ item }) => {
-              item.style.transform = '';
-              item.style.opacity = '';
-            });
-            galleryItems.forEach(item => {
-              item.style.transition = '';
-              item.style.position = '';
-            });
-          }, 300);
         });
       });
     });
