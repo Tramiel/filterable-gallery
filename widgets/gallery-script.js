@@ -44,7 +44,6 @@
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 10px;
         padding: 20px;
-        transition: all 0.3s ease;
       }
       .gallery-item {
         position: relative;
@@ -52,7 +51,7 @@
         overflow: hidden;
         opacity: 1;
         transform: translateY(0);
-        transition: opacity 0.3s ease, transform 0.3s ease;
+        transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease;
       }
       .gallery-item.hidden {
         opacity: 0;
@@ -89,13 +88,14 @@
         justify-content: center;
         align-items: center;
         z-index: 999999 !important;
+        flex-direction: column;
       }
       .lightbox-overlay.active {
         display: flex;
       }
       .lightbox-img {
         max-width: 90vw;
-        max-height: 90vh;
+        max-height: 70vh;
         object-fit: contain;
         border-radius: 8px;
         box-shadow: 0 0 30px #111;
@@ -125,6 +125,48 @@
       .lightbox-arrow.next {
         right: 2vw;
       }
+      .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.7);
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 50%;
+        z-index: 1000000;
+        color: #222;
+        transition: background 0.2s;
+      }
+      .lightbox-close:hover {
+        background: #fff;
+      }
+      .thumbnail-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        overflow-x: auto;
+        max-width: 90vw;
+        padding: 10px 0;
+      }
+      .thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.3s;
+      }
+      .thumbnail.active {
+        opacity: 1;
+        border: 2px solid #007bff;
+      }
+      .thumbnail:hover {
+        opacity: 1;
+      }
       @media (max-width: 768px) {
         .gallery-grid {
           grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -138,13 +180,17 @@
         }
         .lightbox-img {
           max-width: 98vw;
-          max-height: 70vh;
+          max-height: 60vh;
         }
         .lightbox-arrow.prev {
           left: 10px;
         }
         .lightbox-arrow.next {
           right: 10px;
+        }
+        .thumbnail {
+          width: 50px;
+          height: 50px;
         }
       }
     `;
@@ -179,16 +225,18 @@
       </div>
     `;
 
-    // Créer le lightbox dans le DOM parent
+    // Créer le lightbox
     let lightbox = targetDocument.querySelector('.lightbox-overlay');
     if (!lightbox) {
       lightbox = targetDocument.createElement('div');
       lightbox.className = 'lightbox-overlay';
       lightbox.id = 'global-lightbox';
       lightbox.innerHTML = `
+        <button class="lightbox-close" title="Fermer">×</button>
         <button class="lightbox-arrow prev" title="Précédente">←</button>
         <img class="lightbox-img" src="" alt="">
         <button class="lightbox-arrow next" title="Suivante">→</button>
+        <div class="thumbnail-container"></div>
       `;
       targetBody.appendChild(lightbox);
     }
@@ -196,6 +244,7 @@
     // Initialisation du filtrage
     const filterButtons = galleryContainer.querySelectorAll('.filter-button');
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
+    let currentFilter = 'all';
 
     filterButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -206,14 +255,17 @@
         this.classList.add('active');
         this.setAttribute('aria-selected', 'true');
 
-        const filterValue = this.getAttribute('data-filter');
+        currentFilter = this.getAttribute('data-filter');
         galleryItems.forEach(item => {
-          if (filterValue === 'all' || item.classList.contains(filterValue)) {
+          if (currentFilter === 'all' || item.classList.contains(currentFilter)) {
             item.classList.remove('hidden');
           } else {
             item.classList.add('hidden');
           }
         });
+
+        // Forcer le reflow pour la grille
+        galleryContainer.querySelector('.gallery-grid').offsetHeight;
       });
     });
 
@@ -221,10 +273,27 @@
     const lightboxImg = lightbox.querySelector('.lightbox-img');
     const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
     const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
+    const closeBtn = lightbox.querySelector('.lightbox-close');
+    const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
     let currentIndex = 0;
 
     function getVisibleImages() {
       return Array.from(galleryItems).filter(item => !item.classList.contains('hidden'));
+    }
+
+    function updateThumbnails() {
+      const visibleImages = getVisibleImages();
+      thumbnailContainer.innerHTML = visibleImages.map((item, idx) => `
+        <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
+             src="${item.querySelector('img').src}" 
+             alt="${item.querySelector('img').alt}" 
+             data-index="${idx}">
+      `).join('');
+      thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          showLightbox(parseInt(thumb.getAttribute('data-index')));
+        });
+      });
     }
 
     function showLightbox(index) {
@@ -234,6 +303,7 @@
       lightboxImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       lightboxImg.alt = visibleImages[currentIndex].querySelector('img').alt;
       lightbox.classList.add('active');
+      updateThumbnails();
       targetBody.style.overflow = 'hidden';
     }
 
@@ -250,6 +320,7 @@
     function closeLightbox() {
       lightbox.classList.remove('active');
       lightboxImg.src = '';
+      thumbnailContainer.innerHTML = '';
       targetBody.style.overflow = '';
     }
 
@@ -275,6 +346,11 @@
     nextBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       showNext();
+    });
+
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeLightbox();
     });
 
     lightbox.addEventListener('click', (e) => {
