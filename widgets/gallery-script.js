@@ -11,9 +11,9 @@
     const isInIframe = window.self !== window.top;
     const targetDocument = isInIframe ? window.parent.document : document;
     const targetBody = targetDocument.body;
-    const localDocument = document; // Utiliser le DOM local pour la grille
+    const localDocument = document;
 
-    // Injecter le CSS dans le DOM local (iframe) pour la grille
+    // Injecter le CSS dans le DOM local
     const style = localDocument.createElement('style');
     style.textContent = `
       .custom-gallery {
@@ -30,23 +30,31 @@
       .filter-button {
         padding: 8px 20px !important;
         margin: 0 10px !important;
-        background: #f0f0f0 !important;
+        background: #DF5212 !important;
+        color: #fff !important;
         border: 1px solid #ddd !important;
         cursor: pointer !important;
         border-radius: 4px !important;
         font-size: 16px !important;
-        transition: background 0.3s, color 0.3s !important;
+        transition: background 0.3s, color 0.3s, transform 0.1s !important;
       }
-      .filter-button:hover,
+      .filter-button:hover {
+        background: #fff !important;
+        color: #DF5212 !important;
+      }
       .filter-button.active {
-        background: #007bff !important;
+        background: #DF5212 !important;
         color: #fff !important;
+      }
+      .filter-button:active {
+        transform: scale(0.95) !important;
       }
       .gallery-grid {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
         gap: 10px !important;
         padding: 20px !important;
+        justify-content: start !important;
       }
       .gallery-item {
         position: relative;
@@ -65,8 +73,9 @@
       }
       .gallery-item img {
         width: 100% !important;
-        height: 200px !important;
-        object-fit: cover !important;
+        height: auto !important;
+        aspect-ratio: 4/3 !important;
+        object-fit: contain !important;
         display: block !important;
         border-radius: 5px !important;
         cursor: pointer;
@@ -179,7 +188,7 @@
           font-size: 14px !important;
         }
         .gallery-item img {
-          height: 150px !important;
+          aspect-ratio: 4/3 !important;
         }
         .lightbox-img {
           max-width: 98vw !important;
