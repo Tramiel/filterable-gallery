@@ -1,4 +1,3 @@
-// gallery.js
 (function() {
   document.addEventListener('DOMContentLoaded', function() {
     // Trouver le conteneur
@@ -6,6 +5,11 @@
     if (!galleryContainer) {
       console.warn('Conteneur .custom-gallery non trouvé.');
       return;
+    }
+
+    // Vérifier si dans une iframe
+    if (window.self !== window.top) {
+      console.warn('Module dans une iframe. Le plein écran peut être confiné.');
     }
 
     // Injecter le CSS
@@ -17,15 +21,15 @@
         padding: 20px;
       }
       .filter-buttons {
-        margin-bottom: 20px;
         text-align: center;
+        margin: 20px 0;
       }
       .filter-button {
-        padding: 10px 20px;
-        margin: 0 5px;
-        cursor: pointer;
+        padding: 8px 20px;
+        margin: 0 10px;
         background: #f0f0f0;
-        border: none;
+        border: 1px solid #ddd;
+        cursor: pointer;
         border-radius: 4px;
         font-size: 16px;
         transition: background 0.3s, color 0.3s;
@@ -38,107 +42,87 @@
       .gallery-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
+        gap: 10px;
+        padding: 20px;
       }
       .gallery-item {
         position: relative;
+        border-radius: 5px;
         overflow: hidden;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
       .gallery-item img {
         width: 100%;
-        height: auto;
-        max-width: 100%;
-        object-fit: contain;
+        height: 200px;
+        object-fit: cover;
         display: block;
-        border-radius: 8px;
-        transition: transform 0.3s;
+        border-radius: 5px;
         cursor: pointer;
+        transition: transform 0.3s;
+      }
+      .gallery-item:hover img {
+        transform: scale(1.05);
       }
       .gallery-item.visible {
         opacity: 1;
         transform: translateY(0);
-        transition: opacity 0.3s, transform 0.3s;
+        transition: opacity 0.3s ease, transform 0.3s ease;
       }
       .gallery-item:not(.visible) {
         opacity: 0;
         transform: translateY(20px);
         display: none;
       }
-      .gallery-item:hover img {
-        transform: scale(1.05);
-      }
       .filter-button[aria-selected="true"] {
         font-weight: bold;
       }
-      .custom-lightbox {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
+      .lightbox-overlay {
         display: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0, 0, 0, 0.85);
         justify-content: center;
         align-items: center;
-        z-index: 100000;
+        z-index: 999999 !important;
       }
-      .custom-lightbox.active {
+      .lightbox-overlay.active {
         display: flex;
       }
-      .lightbox-image {
-        max-width: 90%;
-        max-height: 90%;
+      .lightbox-img {
+        max-width: 90vw;
+        max-height: 90vh;
         object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 0 30px #111;
+        display: block;
+        margin: 0 auto;
       }
-      .lightbox-nav {
+      .lightbox-arrow {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.7);
         border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        font-size: 2rem;
         cursor: pointer;
-        font-size: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        transition: background 0.3s;
+        padding: 8px 18px;
+        border-radius: 50%;
+        z-index: 1000000;
+        color: #222;
+        transition: background 0.2s;
       }
-      .lightbox-nav:hover {
+      .lightbox-arrow:hover {
         background: #fff;
       }
-      .lightbox-prev {
-        left: 20px;
+      .lightbox-arrow.prev {
+        left: 2vw;
       }
-      .lightbox-next {
-        right: 20px;
-      }
-      .lightbox-close {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        cursor: pointer;
-        font-size: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        transition: background 0.3s;
-      }
-      .lightbox-close:hover {
-        background: #fff;
+      .lightbox-arrow.next {
+        right: 2vw;
       }
       @media (max-width: 768px) {
         .gallery-grid {
@@ -148,15 +132,18 @@
           padding: 8px 15px;
           font-size: 14px;
         }
-        .lightbox-nav {
-          width: 35px;
-          height: 35px;
-          font-size: 18px;
+        .gallery-item img {
+          height: 150px;
         }
-        .lightbox-close {
-          width: 25px;
-          height: 25px;
-          font-size: 16px;
+        .lightbox-img {
+          max-width: 98vw;
+          max-height: 70vh;
+        }
+        .lightbox-arrow.prev {
+          left: 10px;
+        }
+        .lightbox-arrow.next {
+          right: 10px;
         }
       }
     `;
@@ -170,29 +157,40 @@
         <button class="filter-button" data-filter="soiree" role="tab" aria-selected="false">Coiffures de soirée</button>
       </div>
       <div class="gallery-grid">
-        <div class="gallery-item mariage visible" data-category="mariage">
-          <a href="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224" class="gallery-link">
-            <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250" 
-                 alt="Coiffure élégante pour mariage" 
-                 title="Coiffure élégante pour mariage">
-          </a>
+        <div class="gallery-item mariage visible">
+          <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250" 
+               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224"
+               alt="Coiffure élégante pour mariage" 
+               title="Coiffure élégante pour mariage">
         </div>
-        <div class="gallery-item soiree visible" data-category="soiree">
-          <a href="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224" class="gallery-link">
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250" 
-                 alt="Coiffure glamour pour soirée" 
-                 title="Coiffure glamour pour soirée">
-          </a>
+        <div class="gallery-item soiree visible">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250" 
+               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224"
+               alt="Coiffure glamour pour soirée" 
+               title="Coiffure glamour pour soirée">
         </div>
-        <div class="gallery-item mariage visible" data-category="mariage">
-          <a href="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224" class="gallery-link">
-            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250" 
-                 alt="Coiffure romantique pour mariage" 
-                 title="Coiffure romantique pour mariage">
-          </a>
+        <div class="gallery-item mariage visible">
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250" 
+               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224"
+               alt="Coiffure romantique pour mariage" 
+               title="Coiffure romantique pour mariage">
         </div>
       </div>
     `;
+
+    // Créer le lightbox
+    let lightbox = document.querySelector('.lightbox-overlay');
+    if (!lightbox) {
+      lightbox = document.createElement('div');
+      lightbox.className = 'lightbox-overlay';
+      lightbox.id = 'global-lightbox';
+      lightbox.innerHTML = `
+        <button class="lightbox-arrow prev" title="Précédente">←</button>
+        <img class="lightbox-img" src="" alt="">
+        <button class="lightbox-arrow next" title="Suivante">→</button>
+      `;
+      document.body.appendChild(lightbox);
+    }
 
     // Initialisation du filtrage
     const filterButtons = galleryContainer.querySelectorAll('.filter-button');
@@ -210,7 +208,7 @@
         const filterValue = this.getAttribute('data-filter');
         galleryItems.forEach(item => {
           if (filterValue === 'all' || item.classList.contains(filterValue)) {
-            item.style.display = 'flex';
+            item.style.display = 'block';
             setTimeout(() => item.classList.add('visible'), 10);
           } else {
             item.classList.remove('visible');
@@ -220,65 +218,76 @@
       });
     });
 
-    // Créer le conteneur du lightbox
-    let lightbox = document.querySelector('.custom-lightbox');
-    if (!lightbox) {
-      lightbox = document.createElement('div');
-      lightbox.className = 'custom-lightbox';
-      lightbox.innerHTML = `
-        <img class="lightbox-image" id="lightboxImage" src="" alt="">
-        <button class="lightbox-prev" id="lightboxPrev">←</button>
-        <button class="lightbox-next" id="lightboxNext">→</button>
-        <button class="lightbox-close" id="lightboxClose">×</button>
-      `;
-      document.body.appendChild(lightbox);
-    }
-
     // Initialisation du lightbox
-    const lightboxImage = lightbox.querySelector('#lightboxImage');
-    const prevButton = lightbox.querySelector('#lightboxPrev');
-    const nextButton = lightbox.querySelector('#lightboxNext');
-    const closeButton = lightbox.querySelector('#lightboxClose');
-    const links = galleryContainer.querySelectorAll('.gallery-link');
+    const lightboxImg = lightbox.querySelector('.lightbox-img');
+    const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
+    const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
     let currentIndex = 0;
 
-    function showImage(index) {
+    function getVisibleImages() {
+      return Array.from(galleryItems).filter(item => item.classList.contains('visible'));
+    }
+
+    function showLightbox(index) {
+      const visibleImages = getVisibleImages();
+      if (index < 0 || index >= visibleImages.length) return;
       currentIndex = index;
-      lightboxImage.src = links[index].href;
-      lightboxImage.alt = links[index].querySelector('img').alt;
+      lightboxImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
+      lightboxImg.alt = visibleImages[currentIndex].querySelector('img').alt;
       lightbox.classList.add('active');
-      prevButton.style.display = currentIndex === 0 ? 'none' : 'block';
-      nextButton.style.display = currentIndex === links.length - 1 ? 'none' : 'block';
       document.body.style.overflow = 'hidden';
     }
 
-    links.forEach((link, index) => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        showImage(index);
+    galleryItems.forEach((item, idx) => {
+      const img = item.querySelector('img');
+      img.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const visibleImages = getVisibleImages();
+        const visibleIndex = visibleImages.indexOf(item);
+        showLightbox(visibleIndex);
       });
     });
 
-    prevButton.addEventListener('click', () => {
-      if (currentIndex > 0) showImage(currentIndex - 1);
-    });
-
-    nextButton.addEventListener('click', () => {
-      if (currentIndex < links.length - 1) showImage(currentIndex + 1);
-    });
-
-    closeButton.addEventListener('click', () => {
+    function closeLightbox() {
       lightbox.classList.remove('active');
-      lightboxImage.src = '';
+      lightboxImg.src = '';
       document.body.style.overflow = '';
+    }
+
+    function showPrev() {
+      let idx = currentIndex - 1;
+      const visibleImages = getVisibleImages();
+      if (idx < 0) idx = visibleImages.length - 1;
+      showLightbox(idx);
+    }
+
+    function showNext() {
+      let idx = currentIndex + 1;
+      const visibleImages = getVisibleImages();
+      if (idx >= visibleImages.length) idx = 0;
+      showLightbox(idx);
+    }
+
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showPrev();
+    });
+
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showNext();
     });
 
     lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) {
-        lightbox.classList.remove('active');
-        lightboxImage.src = '';
-        document.body.style.overflow = '';
-      }
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    // Navigation clavier
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showPrev();
+      if (e.key === 'ArrowRight') showNext();
     });
   });
 })();
