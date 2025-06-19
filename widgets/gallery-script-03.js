@@ -125,9 +125,7 @@
         position: relative;
         width: 90vw !important;
         max-height: 70vh !important;
-        overflow: hidden !important;
         display: flex !important;
-        flex-direction: row;
         align-items: center;
         justify-content: center;
       }
@@ -138,31 +136,7 @@
         object-fit: contain !important;
         border-radius: 8px !important;
         box-shadow: 0 0 30px #111 !important;
-        flex-shrink: 0;
         display: block !important;
-        opacity: 1;
-        transform: translateX(0);
-        transition: transform 0.3s ease, opacity 0.3s ease !important;
-      }
-      .lightbox-img.incoming-left {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      .lightbox-img.incoming-right {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      .lightbox-img.active {
-        transform: translateX(0) !important;
-        opacity: 1 !important;
-      }
-      .lightbox-img.outgoing-left {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      .lightbox-img.outgoing-right {
-        transform: translateX(100%);
-        opacity: 0;
       }
       .lightbox-arrow {
         position: absolute;
@@ -324,7 +298,7 @@
           <button class="lightbox-close" title="Fermer">×</button>
           <button class="lightbox-arrow prev" title="Précédente">←</button>
           <div class="lightbox-image-container">
-            <img class="lightbox-img active" src="" alt="">
+            <img class="lightbox-img" src="" alt="">
           </div>
           <button class="lightbox-arrow next" title="Suivante">→</button>
           <div class="thumbnail-container"></div>
@@ -362,7 +336,6 @@
     // Initialisation des variables
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     let currentIndex = 0;
-    let isAnimating = false;
 
     function getVisibleImages() {
       const visibleImages = Array.from(galleryItems).filter(item => {
@@ -383,90 +356,43 @@
       `).join('');
       thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
         thumb.addEventListener('click', () => {
-          if (!isAnimating) {
-            const newIndex = parseInt(thumb.getAttribute('data-index'));
-            showLightbox(newIndex, newIndex > currentIndex ? 'right' : 'left');
-          }
+          const newIndex = parseInt(thumb.getAttribute('data-index'));
+          showLightbox(newIndex);
         });
       });
     }
 
-    function showLightbox(index, direction = 'none') {
-      if (isAnimating || index < 0 || index >= getVisibleImages().length) {
-        console.warn('Animation en cours ou index hors limites:', index);
+    function showLightbox(index) {
+      if (index < 0 || index >= getVisibleImages().length) {
+        console.warn('Index hors limites:', index);
         return;
       }
-      isAnimating = true;
-      const visibleImages = getVisibleImages();
       currentIndex = index;
-
+      const visibleImages = getVisibleImages();
       const imageSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       const imageAlt = visibleImages[currentIndex].querySelector('img').alt;
       console.log('Tentative d\'affichage:', { src: imageSrc, alt: imageAlt });
 
-      // Vérifier que lightboxImageContainer existe
       if (!lightboxImageContainer) {
         console.error('Erreur : lightboxImageContainer est null');
-        isAnimating = false;
         return;
       }
 
-      // Récupérer ou créer l'image active
-      let activeImg = lightboxImageContainer.querySelector('.lightbox-img.active');
+      // Mettre à jour l'image
+      let activeImg = lightboxImageContainer.querySelector('.lightbox-img');
       if (!activeImg) {
         activeImg = targetDocument.createElement('img');
-        activeImg.className = 'lightbox-img active';
+        activeImg.className = 'lightbox-img';
         lightboxImageContainer.appendChild(activeImg);
         console.log('Image active créée');
       }
-
-      // Si ouverture initiale, définir directement l'image
-      if (direction === 'none') {
-        activeImg.src = imageSrc;
-        activeImg.alt = imageAlt;
-        lightbox.classList.add('active');
-        updateThumbnails();
-        targetBody.style.overflow = 'hidden';
-        isAnimating = false;
-        console.log('Image initiale affichée:', { src: imageSrc, alt: imageAlt });
-        return;
-      }
-
-      // Créer une nouvelle image pour la transition
-      const newImg = targetDocument.createElement('img');
-      newImg.className = `lightbox-img ${direction === 'right' ? 'incoming-right' : 'incoming-left'}`;
-      newImg.src = imageSrc;
-      newImg.alt = imageAlt;
-
-      // Ajouter la nouvelle image
-      lightboxImageContainer.appendChild(newImg);
-
-      // Animer l'ancienne image
-      if (activeImg) {
-        activeImg.classList.remove('active');
-        activeImg.classList.add(direction === 'right' ? 'outgoing-left' : 'outgoing-right');
-      }
-
-      // Forcer le reflow
-      lightboxImageContainer.offsetHeight;
-
-      // Activer la nouvelle image
-      newImg.classList.remove('incoming-right', 'incoming-left');
-      newImg.classList.add('active');
-
-      // Nettoyer après l'animation
-      setTimeout(() => {
-        if (activeImg && activeImg !== newImg) {
-          activeImg.remove();
-        }
-        isAnimating = false;
-        console.log('Animation terminée, isAnimating:', isAnimating);
-      }, 300);
+      activeImg.src = imageSrc;
+      activeImg.alt = imageAlt;
 
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
-      console.log('Lightbox affiché:', { src: newImg.src, alt: newImg.alt, index: currentIndex });
+      console.log('Lightbox affiché:', { src: imageSrc, alt: imageAlt, index: currentIndex });
     }
 
     galleryItems.forEach((item, idx) => {
@@ -475,39 +401,32 @@
         e.stopPropagation();
         const visibleImages = getVisibleImages();
         const visibleIndex = visibleImages.indexOf(item);
-        if (visibleIndex !== -1 && !isAnimating) {
+        if (visibleIndex !== -1) {
           showLightbox(visibleIndex);
         }
       });
     });
 
     function closeLightbox() {
+      if (!lightbox) {
+        console.error('Erreur : lightbox est null');
+        return;
+      }
       lightbox.classList.remove('active');
-      lightboxImageContainer.innerHTML = '<img class="lightbox-img active" src="" alt="">';
-      thumbnailContainer.innerHTML = '';
+      if (lightboxImageContainer) {
+        const activeImg = lightboxImageContainer.querySelector('.lightbox-img');
+        if (activeImg) {
+          activeImg.src = '';
+          activeImg.alt = '';
+        }
+      } else {
+        console.warn('Avertissement : lightboxImageContainer est null lors de la fermeture');
+      }
+      if (thumbnailContainer) {
+        thumbnailContainer.innerHTML = '';
+      }
       targetBody.style.overflow = '';
-      isAnimating = false;
       console.log('Lightbox fermé');
-    }
-
-    function showPrev() {
-      if (isAnimating) return;
-      const visibleImages = getVisibleImages();
-      let idx = currentIndex - 1;
-      if (idx < 0) idx = visibleImages.length - 1;
-      if (visibleImages[idx]) {
-        showLightbox(idx, 'left');
-      }
-    }
-
-    function showNext() {
-      if (isAnimating) return;
-      const visibleImages = getVisibleImages();
-      let idx = currentIndex + 1;
-      if (idx >= visibleImages.length) idx = 0;
-      if (visibleImages[idx]) {
-        showLightbox(idx, 'right');
-      }
     }
 
     prevBtn.addEventListener('click', (e) => {
@@ -531,11 +450,29 @@
 
     // Navigation clavier
     targetDocument.addEventListener('keydown', (e) => {
-      if (!lightbox.classList.contains('active') || isAnimating) return;
+      if (!lightbox.classList.contains('active')) return;
       if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') showPrev();
       if (e.key === 'ArrowRight') showNext();
     });
+
+    function showPrev() {
+      const visibleImages = getVisibleImages();
+      let idx = currentIndex - 1;
+      if (idx < 0) idx = visibleImages.length - 1;
+      if (visibleImages[idx]) {
+        showLightbox(idx);
+      }
+    }
+
+    function showNext() {
+      const visibleImages = getVisibleImages();
+      let idx = currentIndex + 1;
+      if (idx >= visibleImages.length) idx = 0;
+      if (visibleImages[idx]) {
+        showLightbox(idx);
+      }
+    }
 
     // Ajuster la hauteur de l'iframe
     if (isInIframe) {
