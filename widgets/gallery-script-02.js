@@ -124,21 +124,21 @@
       .lightbox-image-container {
         position: relative;
         width: 90vw !important;
-        height: 70vh !important;
+        max-height: 70vh !important;
         overflow: hidden !important;
         display: flex !important;
         flex-direction: row;
+        align-items: center;
       }
       .lightbox-img {
+        width: auto !important;
         max-width: 90vw !important;
         max-height: 70vh !important;
         object-fit: contain !important;
         border-radius: 8px !important;
         box-shadow: 0 0 30px #111 !important;
-        display: block !important;
         flex-shrink: 0;
-        width: 100% !important;
-        height: 100% !important;
+        display: block !important;
         transition: transform 0.3s ease, opacity 0.3s ease !important;
       }
       .lightbox-img.incoming-left {
@@ -229,7 +229,7 @@
       @media (max-width: 768px) {
         .lightbox-image-container {
           width: 98vw !important;
-          height: 60vh !important;
+          max-height: 60vh !important;
         }
         .lightbox-img {
           max-width: 98vw !important;
@@ -357,7 +357,8 @@
       thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
         thumb.addEventListener('click', () => {
           if (!isAnimating) {
-            showLightbox(parseInt(thumb.getAttribute('data-index')), 'right');
+            const newIndex = parseInt(thumb.getAttribute('data-index'));
+            showLightbox(newIndex, newIndex > currentIndex ? 'right' : 'left');
           }
         });
       });
@@ -372,23 +373,29 @@
       const visibleImages = getVisibleImages();
       currentIndex = index;
 
+      // Nettoyer le conteneur pour l'ouverture initiale
+      if (direction === 'none') {
+        lightboxImageContainer.innerHTML = '';
+      }
+
       // Créer la nouvelle image
       const newImg = targetDocument.createElement('img');
       newImg.className = `lightbox-img ${direction === 'right' ? 'incoming-right' : direction === 'left' ? 'incoming-left' : 'active'}`;
       newImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       newImg.alt = visibleImages[currentIndex].querySelector('img').alt;
+      console.log('Nouvelle image:', newImg.src, newImg.alt);
 
-      // Ajouter la nouvelle image au conteneur
+      // Ajouter la nouvelle image
       lightboxImageContainer.appendChild(newImg);
 
-      // Si ce n'est pas la première ouverture, animer l'ancienne image
+      // Animer l'ancienne image si nécessaire
       const currentImg = lightboxImageContainer.querySelector('.lightbox-img.active');
       if (currentImg && direction !== 'none') {
         currentImg.classList.remove('active');
         currentImg.classList.add(direction === 'right' ? 'outgoing-left' : 'outgoing-right');
       }
 
-      // Forcer le reflow pour déclencher l'animation
+      // Forcer le reflow
       lightboxImageContainer.offsetHeight;
 
       // Activer la nouvelle image
@@ -401,12 +408,13 @@
           currentImg.remove();
         }
         isAnimating = false;
-      }, 300); // Correspond à la durée de transition (0.3s)
+        console.log('Animation terminée, isAnimating:', isAnimating);
+      }, 300);
 
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
-      console.log('Affichage image:', newImg.alt, 'Index:', currentIndex);
+      console.log('Lightbox affiché:', newImg.alt, 'Index:', currentIndex);
     }
 
     galleryItems.forEach((item, idx) => {
@@ -427,6 +435,7 @@
       thumbnailContainer.innerHTML = '';
       targetBody.style.overflow = '';
       isAnimating = false;
+      console.log('Lightbox fermé');
     }
 
     function showPrev() {
