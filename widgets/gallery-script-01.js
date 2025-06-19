@@ -385,7 +385,10 @@
     let currentIndex = 0;
 
     function getVisibleImages() {
-      return Array.from(galleryItems).filter(item => !item.classList.contains('mixitup-hidden'));
+      return Array.from(galleryItems).filter(item => {
+        const style = window.getComputedStyle(item);
+        return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
+      });
     }
 
     function updateThumbnails() {
@@ -420,7 +423,9 @@
         e.stopPropagation();
         const visibleImages = getVisibleImages();
         const visibleIndex = visibleImages.indexOf(item);
-        showLightbox(visibleIndex);
+        if (visibleIndex !== -1) {
+          showLightbox(visibleIndex);
+        }
       });
     });
 
@@ -432,15 +437,15 @@
     }
 
     function showPrev() {
-      let idx = currentIndex - 1;
       const visibleImages = getVisibleImages();
+      let idx = currentIndex - 1;
       if (idx < 0) idx = visibleImages.length - 1;
       showLightbox(idx);
     }
 
     function showNext() {
-      let idx = currentIndex + 1;
       const visibleImages = getVisibleImages();
+      let idx = currentIndex + 1;
       if (idx >= visibleImages.length) idx = 0;
       showLightbox(idx);
     }
