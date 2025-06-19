@@ -30,8 +30,7 @@
       .filter-button {
         padding: 8px 20px !important;
         margin: 0 10px !important;
-        background: #DF5212 !important;
-        color: #fff !important;
+        background: #f0f0f0 !important;
         border: 1px solid #ddd !important;
         cursor: pointer !important;
         border-radius: 4px !important;
@@ -39,11 +38,10 @@
         transition: background 0.3s, color 0.3s, transform 0.1s !important;
       }
       .filter-button:hover {
-        background: #fff !important;
-        color: #DF5212 !important;
+        background: #e0e0e0 !important;
       }
       .filter-button.active {
-        background: #DF5212 !important;
+        background: #007bff !important;
         color: #fff !important;
       }
       .filter-button:active {
@@ -51,33 +49,25 @@
       }
       .gallery-grid {
         display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-        gap: 10px !important;
+        grid-template-columns: repeat(auto-fill, 250px) !important;
+        column-gap: 15px !important;
+        row-gap: 15px !important;
         padding: 20px !important;
         justify-content: start !important;
       }
       .gallery-item {
         position: relative;
-        border-radius: 5px;
-        overflow: hidden;
-        opacity: 1;
-        transform: translateY(0);
-        transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease;
-      }
-      .gallery-item.hidden {
-        opacity: 0;
-        transform: translateY(20px);
-        height: 0;
-        margin: 0;
+        width: 250px !important;
+        height: 250px !important; /* MODIFICATION : Hauteur fixe pour uniformiser */
+        border-radius: 8px; /* MODIFICATION : Arrondi pour le conteneur */
         overflow: hidden;
       }
       .gallery-item img {
         width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 4/3 !important;
-        object-fit: contain !important;
+        height: 100% !important; /* MODIFICATION : Hauteur fixe pour remplir le conteneur */
+        object-fit: cover !important; /* MODIFICATION : Remplit l'espace, rogne si nécessaire */
         display: block !important;
-        border-radius: 5px !important;
+        border-radius: 8px !important; /* MODIFICATION : Arrondi pour les images */
         cursor: pointer;
         transition: transform 0.3s ease;
       }
@@ -181,14 +171,20 @@
       }
       @media (max-width: 768px) {
         .gallery-grid {
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+          grid-template-columns: repeat(auto-fill, 150px) !important;
+        }
+        .gallery-item {
+          width: 150px !important;
+          height: 150px !important; /* MODIFICATION : Hauteur fixe pour mobile */
         }
         .filter-button {
           padding: 8px 15px !important;
           font-size: 14px !important;
         }
         .gallery-item img {
-          aspect-ratio: 4/3 !important;
+          width: 100% !important;
+          height: 100% !important; /* MODIFICATION : Hauteur fixe pour mobile */
+          object-fit: cover !important;
         }
         .lightbox-img {
           max-width: 98vw !important;
@@ -310,30 +306,61 @@
     galleryContainer.innerHTML = `
       <div class="filter-buttons" role="tablist">
         <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Toutes</button>
-        <button class="filter-button" data-filter="mariage" role="tab" aria-selected="false">Coiffures de mariage</button>
-        <button class="filter-button" data-filter="soiree" role="tab" aria-selected="false">Coiffures de soirée</button>
+        <button class="filter-button" data-filter=".mariage" role="tab" aria-selected="false">Coiffures de mariage</button>
+        <button class="filter-button" data-filter=".soiree" role="tab" aria-selected="false">Coiffures de soirée</button>
       </div>
       <div class="gallery-grid">
-        <div class="gallery-item mariage">
-          <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250" 
+        <div class="gallery-item mix mariage">
+          <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250&h=250" 
                data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224"
                alt="Coiffure élégante pour mariage" 
                title="Coiffure élégante pour mariage">
         </div>
-        <div class="gallery-item soiree">
-          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250" 
+        <div class="gallery-item mix soiree">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250&h=250" 
                data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224"
                alt="Coiffure glamour pour soirée" 
                title="Coiffure glamour pour soirée">
         </div>
-        <div class="gallery-item mariage">
-          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250" 
+        <div class="gallery-item mix mariage">
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250&h=250" 
                data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224"
                alt="Coiffure romantique pour mariage" 
                title="Coiffure romantique pour mariage">
         </div>
       </div>
     `;
+
+    // Charger MixItUp
+    const script = localDocument.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
+    script.onload = function() {
+      // Initialiser MixItUp
+      mixitup('.gallery-grid', {
+        selectors: {
+          target: '.gallery-item'
+        },
+        animation: {
+          duration: 300,
+          effects: 'fade translateZ(-360px) translateY(20px)',
+          easing: 'ease'
+        }
+      });
+
+      // Gérer les boutons de filtrage
+      const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+      filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          filterButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+          });
+          this.classList.add('active');
+          this.setAttribute('aria-selected', 'true');
+        });
+      });
+    };
+    localDocument.head.appendChild(script);
 
     // Créer le lightbox dans le DOM parent
     let lightbox = targetDocument.querySelector('.lightbox-overlay');
@@ -351,35 +378,8 @@
       targetBody.appendChild(lightbox);
     }
 
-    // Initialisation du filtrage
-    const filterButtons = galleryContainer.querySelectorAll('.filter-button');
-    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
-    let currentFilter = 'all';
-
-    filterButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        filterButtons.forEach(btn => {
-          btn.classList.remove('active');
-          btn.setAttribute('aria-selected', 'false');
-        });
-        this.classList.add('active');
-        this.setAttribute('aria-selected', 'true');
-
-        currentFilter = this.getAttribute('data-filter');
-        galleryItems.forEach(item => {
-          if (currentFilter === 'all' || item.classList.contains(currentFilter)) {
-            item.classList.remove('hidden');
-          } else {
-            item.classList.add('hidden');
-          }
-        });
-
-        // Forcer le reflow
-        galleryContainer.querySelector('.gallery-grid').offsetHeight;
-      });
-    });
-
     // Initialisation du lightbox
+    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     const lightboxImg = lightbox.querySelector('.lightbox-img');
     const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
     const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
@@ -388,7 +388,10 @@
     let currentIndex = 0;
 
     function getVisibleImages() {
-      return Array.from(galleryItems).filter(item => !item.classList.contains('hidden'));
+      return Array.from(galleryItems).filter(item => {
+        const style = window.getComputedStyle(item);
+        return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
+      });
     }
 
     function updateThumbnails() {
@@ -423,7 +426,9 @@
         e.stopPropagation();
         const visibleImages = getVisibleImages();
         const visibleIndex = visibleImages.indexOf(item);
-        showLightbox(visibleIndex);
+        if (visibleIndex !== -1) {
+          showLightbox(visibleIndex);
+        }
       });
     });
 
@@ -435,15 +440,15 @@
     }
 
     function showPrev() {
-      let idx = currentIndex - 1;
       const visibleImages = getVisibleImages();
+      let idx = currentIndex - 1;
       if (idx < 0) idx = visibleImages.length - 1;
       showLightbox(idx);
     }
 
     function showNext() {
-      let idx = currentIndex + 1;
       const visibleImages = getVisibleImages();
+      let idx = currentIndex + 1;
       if (idx >= visibleImages.length) idx = 0;
       showLightbox(idx);
     }
