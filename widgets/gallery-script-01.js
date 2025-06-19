@@ -60,14 +60,6 @@
         width: 250px !important;
         border-radius: 5px;
         overflow: hidden;
-        opacity: 1;
-        transform: translate(0, 0);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-      }
-      .gallery-item.hidden {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
       }
       .gallery-item img {
         width: 100% !important;
@@ -311,23 +303,23 @@
     galleryContainer.innerHTML = `
       <div class="filter-buttons" role="tablist">
         <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Toutes</button>
-        <button class="filter-button" data-filter="mariage" role="tab" aria-selected="false">Coiffures de mariage</button>
-        <button class="filter-button" data-filter="soiree" role="tab" aria-selected="false">Coiffures de soirée</button>
+        <button class="filter-button" data-filter=".mariage" role="tab" aria-selected="false">Coiffures de mariage</button>
+        <button class="filter-button" data-filter=".soiree" role="tab" aria-selected="false">Coiffures de soirée</button>
       </div>
       <div class="gallery-grid">
-        <div class="gallery-item mariage">
+        <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250" 
                data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224"
                alt="Coiffure élégante pour mariage" 
                title="Coiffure élégante pour mariage">
         </div>
-        <div class="gallery-item soiree">
+        <div class="gallery-item mix soiree">
           <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250" 
                data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224"
                alt="Coiffure glamour pour soirée" 
                title="Coiffure glamour pour soirée">
         </div>
-        <div class="gallery-item mariage">
+        <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250" 
                data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224"
                alt="Coiffure romantique pour mariage" 
@@ -335,6 +327,37 @@
         </div>
       </div>
     `;
+
+    // Charger MixItUp
+    const script = localDocument.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
+    script.onload = function() {
+      // Initialiser MixItUp
+      mixitup('.gallery-grid', {
+        selectors: {
+          target: '.gallery-item'
+        },
+        animation: {
+          duration: 300,
+          effects: 'fade translateZ(-360px) translateY(20px)',
+          easing: 'ease'
+        }
+      });
+
+      // Gérer les boutons de filtrage
+      const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+      filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          filterButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+          });
+          this.classList.add('active');
+          this.setAttribute('aria-selected', 'true');
+        });
+      });
+    };
+    localDocument.head.appendChild(script);
 
     // Créer le lightbox dans le DOM parent
     let lightbox = targetDocument.querySelector('.lightbox-overlay');
@@ -352,99 +375,8 @@
       targetBody.appendChild(lightbox);
     }
 
-    // Initialisation du filtrage
-    const filterButtons = galleryContainer.querySelectorAll('.filter-button');
-    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
-    let currentFilter = 'all';
-
-    filterButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        filterButtons.forEach(btn => {
-          btn.classList.remove('active');
-          btn.setAttribute('aria-selected', 'false');
-        });
-        this.classList.add('active');
-        this.setAttribute('aria-selected', 'true');
-
-        currentFilter = this.getAttribute('data-filter');
-
-        // Calculer les positions initiales
-        const gridRect = galleryContainer.querySelector('.gallery-grid').getBoundingClientRect();
-        const itemRects = Array.from(galleryItems).map(item => item.getBoundingClientRect());
-        const visibleItems = [];
-        const hiddenItems = [];
-
-        galleryItems.forEach((item, index) => {
-          const isVisible = currentFilter === 'all' || item.classList.contains(currentFilter);
-          if (isVisible) {
-            visibleItems.push({ item, index, rect: itemRects[index] });
-          } else {
-            hiddenItems.push({ item, index, rect: itemRects[index] });
-          }
-        });
-
-        // Préparer l'animation
-        galleryItems.forEach(item => {
-          item.style.position = 'relative';
-          item.style.transition = 'none';
-          item.style.transform = 'translate(0, 0)';
-          item.style.opacity = '1';
-          item.classList.remove('hidden');
-        });
-
-        // Appliquer les positions initiales pour les éléments visibles
-        visibleItems.forEach(({ item, rect }) => {
-          const dx = rect.left - gridRect.left;
-          item.style.transform = `translateX(${dx}px)`;
-        });
-
-        hiddenItems.forEach(({ item, rect }) => {
-          const dx = rect.left - gridRect.left;
-          item.style.transform = `translateX(${dx}px)`;
-        });
-
-        // Forcer le reflow pour initialiser l'animation
-        galleryContainer.querySelector('.gallery-grid').offsetHeight;
-
-        // Animer vers les nouvelles positions
-        requestAnimationFrame(() => {
-          galleryItems.forEach(item => {
-            item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-          });
-
-          visibleItems.forEach(({ item }, idx) => {
-            // Calculer la position finale dans la grille
-            const finalX = idx * (250 + 15); // 250px (largeur) + 15px (gap)
-            item.style.transform = `translateX(${finalX}px)`;
-            item.style.opacity = '1';
-          });
-
-          hiddenItems.forEach(({ item }) => {
-            item.style.transform = 'translateY(20px)';
-            item.style.opacity = '0';
-          });
-
-          // Nettoyer après l'animation
-          setTimeout(() => {
-            visibleItems.forEach(({ item }, idx) => {
-              item.style.position = '';
-              item.style.transform = '';
-              item.style.transition = '';
-              item.style.opacity = '';
-            });
-            hiddenItems.forEach(({ item }) => {
-              item.classList.add('hidden');
-              item.style.position = '';
-              item.style.transform = '';
-              item.style.transition = '';
-              item.style.opacity = '';
-            });
-          }, 300);
-        });
-      });
-    });
-
     // Initialisation du lightbox
+    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     const lightboxImg = lightbox.querySelector('.lightbox-img');
     const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
     const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
@@ -453,7 +385,7 @@
     let currentIndex = 0;
 
     function getVisibleImages() {
-      return Array.from(galleryItems).filter(item => !item.classList.contains('hidden'));
+      return Array.from(galleryItems).filter(item => !item.classList.contains('mixitup-hidden'));
     }
 
     function updateThumbnails() {
