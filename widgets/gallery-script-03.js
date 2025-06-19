@@ -312,36 +312,52 @@
     };
     localDocument.head.appendChild(script);
 
-    // Créer le lightbox dans le DOM parent
-    let lightbox = targetDocument.querySelector('.lightbox-overlay');
-    if (!lightbox) {
-      lightbox = targetDocument.createElement('div');
-      lightbox.className = 'lightbox-overlay';
-      lightbox.id = 'global-lightbox';
-      lightbox.innerHTML = `
-        <button class="lightbox-close" title="Fermer">×</button>
-        <button class="lightbox-arrow prev" title="Précédente">←</button>
-        <div class="lightbox-image-container">
-          <img class="lightbox-img active" src="" alt="">
-        </div>
-        <button class="lightbox-arrow next" title="Suivante">→</button>
-        <div class="thumbnail-container"></div>
-      `;
-      targetBody.appendChild(lightbox);
-      console.log('Lightbox créé dans le DOM parent');
+    // Fonction pour créer ou récupérer le lightbox
+    function initializeLightbox() {
+      let lightbox = targetDocument.querySelector('.lightbox-overlay');
+      if (!lightbox) {
+        lightbox = targetDocument.createElement('div');
+        lightbox.className = 'lightbox-overlay';
+        lightbox.id = 'global-lightbox';
+        const lightboxContent = targetDocument.createElement('div');
+        lightboxContent.innerHTML = `
+          <button class="lightbox-close" title="Fermer">×</button>
+          <button class="lightbox-arrow prev" title="Précédente">←</button>
+          <div class="lightbox-image-container">
+            <img class="lightbox-img active" src="" alt="">
+          </div>
+          <button class="lightbox-arrow next" title="Suivante">→</button>
+          <div class="thumbnail-container"></div>
+        `;
+        lightbox.appendChild(lightboxContent);
+        targetBody.appendChild(lightbox);
+        console.log('Lightbox créé dans le DOM parent');
+      }
+
+      const lightboxImageContainer = lightbox.querySelector('.lightbox-image-container');
+      if (!lightboxImageContainer) {
+        console.error('Erreur : .lightbox-image-container non trouvé dans le lightbox');
+        return null;
+      }
+      console.log('Lightbox initialisé avec succès');
+      return {
+        lightbox,
+        lightboxImageContainer,
+        prevBtn: lightbox.querySelector('.lightbox-arrow.prev'),
+        nextBtn: lightbox.querySelector('.lightbox-arrow.next'),
+        closeBtn: lightbox.querySelector('.lightbox-close'),
+        thumbnailContainer: lightbox.querySelector('.thumbnail-container')
+      };
     }
 
-    // Initialiser les éléments du lightbox après sa création
-    const lightboxImageContainer = lightbox.querySelector('.lightbox-image-container');
-    const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
-    const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
-    const closeBtn = lightbox.querySelector('.lightbox-close');
-    const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
-
-    if (!lightboxImageContainer) {
-      console.error('Erreur : .lightbox-image-container non trouvé dans le lightbox');
+    // Initialiser le lightbox
+    const lightboxElements = initializeLightbox();
+    if (!lightboxElements) {
+      console.error('Échec de l\'initialisation du lightbox');
       return;
     }
+
+    const { lightbox, lightboxImageContainer, prevBtn, nextBtn, closeBtn, thumbnailContainer } = lightboxElements;
 
     // Initialisation des variables
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
@@ -388,6 +404,7 @@
       const imageAlt = visibleImages[currentIndex].querySelector('img').alt;
       console.log('Tentative d\'affichage:', { src: imageSrc, alt: imageAlt });
 
+      // Vérifier que lightboxImageContainer existe
       if (!lightboxImageContainer) {
         console.error('Erreur : lightboxImageContainer est null');
         isAnimating = false;
