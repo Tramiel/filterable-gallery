@@ -61,16 +61,13 @@
         border-radius: 5px;
         overflow: hidden;
         opacity: 1;
-        transform: translateY(0);
-        transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease;
+        transform: translate(0, 0);
+        transition: opacity 0.3s ease, transform 0.3s ease;
       }
       .gallery-item.hidden {
         opacity: 0;
         transform: translateY(20px);
-        height: 0;
-        margin: 0;
-        overflow: hidden;
-        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
       }
       .gallery-item img {
         width: 100% !important;
@@ -371,20 +368,78 @@
 
         currentFilter = this.getAttribute('data-filter');
 
-        galleryItems.forEach(item => {
+        // Calculer les positions initiales
+        const gridRect = galleryContainer.querySelector('.gallery-grid').getBoundingClientRect();
+        const itemRects = Array.from(galleryItems).map(item => item.getBoundingClientRect());
+        const visibleItems = [];
+        const hiddenItems = [];
+
+        galleryItems.forEach((item, index) => {
           const isVisible = currentFilter === 'all' || item.classList.contains(currentFilter);
           if (isVisible) {
-            item.classList.remove('hidden');
+            visibleItems.push({ item, index, rect: itemRects[index] });
           } else {
-            item.classList.add('hidden');
+            hiddenItems.push({ item, index, rect: itemRects[index] });
           }
         });
 
-        // Animation fluide via transitions CSS
+        // Préparer l'animation
+        galleryItems.forEach(item => {
+          item.style.position = 'relative';
+          item.style.transition = 'none';
+          item.style.transform = 'translate(0, 0)';
+          item.style.opacity = '1';
+          item.classList.remove('hidden');
+        });
+
+        // Appliquer les positions initiales pour les éléments visibles
+        visibleItems.forEach(({ item, rect }) => {
+          const dx = rect.left - gridRect.left;
+          item.style.transform = `translateX(${dx}px)`;
+        });
+
+        hiddenItems.forEach(({ item, rect }) => {
+          const dx = rect.left - gridRect.left;
+          item.style.transform = `translateX(${dx}px)`;
+        });
+
+        // Forcer le reflow pour initialiser l'animation
+        galleryContainer.querySelector('.gallery-grid').offsetHeight;
+
+        // Animer vers les nouvelles positions
         requestAnimationFrame(() => {
           galleryItems.forEach(item => {
-            item.style.transition = 'opacity 0.3s ease, transform 0.3s ease, height 0.3s ease';
+            item.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
           });
+
+          visibleItems.forEach(({ item }, idx) => {
+            // Calculer la position finale dans la grille
+            const finalX = idx * (250 + 15); // 250px (largeur) + 15px (gap)
+            item.style.transform = `translateX(${finalX}px)`;
+            item.style.opacity = '1';
+          });
+
+          hiddenItems.forEach(({ item }) => {
+            item.style.transform = 'translateY(20px)';
+            item.style.opacity = '0';
+          });
+
+          // Nettoyer après l'animation
+          setTimeout(() => {
+            visibleItems.forEach(({ item }, idx) => {
+              item.style.position = '';
+              item.style.transform = '';
+              item.style.transition = '';
+              item.style.opacity = '';
+            });
+            hiddenItems.forEach(({ item }) => {
+              item.classList.add('hidden');
+              item.style.position = '';
+              item.style.transform = '';
+              item.style.transition = '';
+              item.style.opacity = '';
+            });
+          }, 300);
         });
       });
     });
