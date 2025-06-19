@@ -58,16 +58,16 @@
       .gallery-item {
         position: relative;
         width: 250px !important;
-        height: 250px !important; /* MODIFICATION : Hauteur fixe pour uniformiser */
-        border-radius: 8px; /* MODIFICATION : Arrondi pour le conteneur */
-        overflow: hidden;
+        height: 250px !important;
+        border-radius: 8px !important; /* MODIFICATION : Renforcer border-radius */
+        overflow: hidden !important; /* MODIFICATION : Assurer le masquage des débordements */
       }
       .gallery-item img {
         width: 100% !important;
-        height: 100% !important; /* MODIFICATION : Hauteur fixe pour remplir le conteneur */
-        object-fit: cover !important; /* MODIFICATION : Remplit l'espace, rogne si nécessaire */
+        height: 100% !important;
+        object-fit: cover !important;
         display: block !important;
-        border-radius: 8px !important; /* MODIFICATION : Arrondi pour les images */
+        border-radius: 8px !important; /* MODIFICATION : Border-radius explicite */
         cursor: pointer;
         transition: transform 0.3s ease;
       }
@@ -175,7 +175,8 @@
         }
         .gallery-item {
           width: 150px !important;
-          height: 150px !important; /* MODIFICATION : Hauteur fixe pour mobile */
+          height: 150px !important;
+          border-radius: 8px !important; /* MODIFICATION : Border-radius sur mobile */
         }
         .filter-button {
           padding: 8px 15px !important;
@@ -183,8 +184,9 @@
         }
         .gallery-item img {
           width: 100% !important;
-          height: 100% !important; /* MODIFICATION : Hauteur fixe pour mobile */
+          height: 100% !important;
           object-fit: cover !important;
+          border-radius: 8px !important; /* MODIFICATION : Border-radius sur mobile */
         }
         .lightbox-img {
           max-width: 98vw !important;
@@ -388,10 +390,13 @@
     let currentIndex = 0;
 
     function getVisibleImages() {
-      return Array.from(galleryItems).filter(item => {
+      const visibleImages = Array.from(galleryItems).filter(item => {
         const style = window.getComputedStyle(item);
         return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
       });
+      // MODIFICATION : Log pour débogage
+      console.log('Visible images:', visibleImages.map(item => item.querySelector('img').alt));
+      return visibleImages;
     }
 
     function updateThumbnails() {
@@ -411,13 +416,18 @@
 
     function showLightbox(index) {
       const visibleImages = getVisibleImages();
-      if (index < 0 || index >= visibleImages.length) return;
+      if (index < 0 || index >= visibleImages.length) {
+        console.warn('Index hors limites:', index, visibleImages.length);
+        return;
+      }
       currentIndex = index;
       lightboxImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       lightboxImg.alt = visibleImages[currentIndex].querySelector('img').alt;
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
+      // MODIFICATION : Log pour débogage
+      console.log('Affichage image:', lightboxImg.alt, 'Index:', currentIndex);
     }
 
     galleryItems.forEach((item, idx) => {
@@ -443,14 +453,20 @@
       const visibleImages = getVisibleImages();
       let idx = currentIndex - 1;
       if (idx < 0) idx = visibleImages.length - 1;
-      showLightbox(idx);
+      // MODIFICATION : Vérifier que l'image est valide
+      if (visibleImages[idx]) {
+        showLightbox(idx);
+      }
     }
 
     function showNext() {
       const visibleImages = getVisibleImages();
       let idx = currentIndex + 1;
       if (idx >= visibleImages.length) idx = 0;
-      showLightbox(idx);
+      // MODIFICATION : Vérifier que l'image est valide
+      if (visibleImages[idx]) {
+        showLightbox(idx);
+      }
     }
 
     prevBtn.addEventListener('click', (e) => {
