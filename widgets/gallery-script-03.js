@@ -328,15 +328,23 @@
         <div class="thumbnail-container"></div>
       `;
       targetBody.appendChild(lightbox);
+      console.log('Lightbox créé dans le DOM parent');
     }
 
-    // Initialisation du lightbox
-    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
+    // Initialiser les éléments du lightbox après sa création
     const lightboxImageContainer = lightbox.querySelector('.lightbox-image-container');
     const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
     const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
     const closeBtn = lightbox.querySelector('.lightbox-close');
     const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
+
+    if (!lightboxImageContainer) {
+      console.error('Erreur : .lightbox-image-container non trouvé dans le lightbox');
+      return;
+    }
+
+    // Initialisation des variables
+    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     let currentIndex = 0;
     let isAnimating = false;
 
@@ -380,12 +388,19 @@
       const imageAlt = visibleImages[currentIndex].querySelector('img').alt;
       console.log('Tentative d\'affichage:', { src: imageSrc, alt: imageAlt });
 
+      if (!lightboxImageContainer) {
+        console.error('Erreur : lightboxImageContainer est null');
+        isAnimating = false;
+        return;
+      }
+
       // Récupérer ou créer l'image active
       let activeImg = lightboxImageContainer.querySelector('.lightbox-img.active');
       if (!activeImg) {
         activeImg = targetDocument.createElement('img');
         activeImg.className = 'lightbox-img active';
         lightboxImageContainer.appendChild(activeImg);
+        console.log('Image active créée');
       }
 
       // Si ouverture initiale, définir directement l'image
