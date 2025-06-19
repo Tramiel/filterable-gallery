@@ -125,9 +125,10 @@
         position: relative;
         width: 90vw !important;
         max-height: 70vh !important;
+        overflow: hidden !important;
         display: flex !important;
+        flex-direction: row;
         align-items: center;
-        justify-content: center;
       }
       .lightbox-img {
         width: auto !important;
@@ -136,7 +137,29 @@
         object-fit: contain !important;
         border-radius: 8px !important;
         box-shadow: 0 0 30px #111 !important;
+        flex-shrink: 0;
         display: block !important;
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
+      }
+      .lightbox-img.incoming-left {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      .lightbox-img.incoming-right {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      .lightbox-img.active {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      .lightbox-img.outgoing-left {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      .lightbox-img.outgoing-right {
+        transform: translateX(100%);
+        opacity: 0;
       }
       .lightbox-arrow {
         position: absolute;
@@ -309,7 +332,7 @@
         imageContainer.className = 'lightbox-image-container';
 
         const img = targetDocument.createElement('img');
-        img.className = 'lightbox-img';
+        img.className = 'lightbox-img active';
         img.src = '';
         img.alt = '';
         imageContainer.appendChild(img);
@@ -367,6 +390,7 @@
       // Initialisation des variables
       const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
       let currentIndex = 0;
+      let isAnimating = false;
 
       function getVisibleImages() {
         const visibleImages = Array.from(galleryItems).filter(item => {
@@ -387,43 +411,66 @@
           thumb.alt = item.querySelector('img').alt;
           thumb.dataset.index = idx;
           thumb.addEventListener('click', () => {
-            showLightbox(parseInt(thumb.dataset.index));
+            if (!isAnimating) {
+              const newIndex = parseInt(thumb.dataset.index);
+              showLightbox(newIndex, newIndex > currentIndex ? 'right' : 'left');
+            }
           });
           thumbnailContainer.appendChild(thumb);
         });
       }
 
-      function showLightbox(index) {
-        if (index < 0 || index >= getVisibleImages().length) {
-          console.warn('Index hors limites:', index);
+      function showLightbox(index, direction = 'none') {
+        if (isAnimating || index < 0 || index >= getVisibleImages().length) {
+          console.warn('Animation en cours ou index hors limites:', index);
           return;
         }
-        currentIndex = index;
+        isAnimating = true;
         const visibleImages = getVisibleImages();
-        const imageSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-        const imageAlt = visibleImages[currentIndex].querySelector('img').alt;
-        console.log('Tentative d\'affichage:', { src: imageSrc, alt: imageAlt });
+        currentIndex = index;
 
-        if (!lightboxImageContainer) {
-          console.error('Erreur : lightboxImageContainer est null');
-          return;
+        // Nettoyer le conteneur pour l'ouverture initiale
+        if (direction === 'none') {
+          lightboxImageContainer.innerHTML = '';
         }
 
-        // Mettre à jour l'image
-        let activeImg = lightboxImageContainer.querySelector('.lightbox-img');
-        if (!activeImg) {
-          activeImg = targetDocument.createElement('img');
-          activeImg.className = 'lightbox-img';
-          lightboxImageContainer.appendChild(activeImg);
-          console.log('Image active créée');
+        // Créer la nouvelle image
+        const newImg = targetDocument.createElement('img');
+        newImg.className = `lightbox-img ${direction === 'right' ? 'incoming-right' : direction === 'left' ? 'incoming-left' : 'active'}`;
+        newImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
+        newImg.alt = visibleImages[currentIndex].querySelector('img').alt;
+        console.log('Nouvelle image:', newImg.src, newImg.alt);
+
+        // Ajouter la nouvelle image
+        lightboxImageContainer.appendChild(newImg);
+
+        // Animer l'ancienne image si nécessaire
+        const currentImg = lightboxImageContainer.querySelector('.lightbox-img.active');
+        if (currentImg && direction !== 'none') {
+          currentImg.classList.remove('active');
+          currentImg.classList.add(direction === 'right' ? 'outgoing-left' : 'outgoing-right');
         }
-        activeImg.src = imageSrc;
-        activeImg.alt = imageAlt;
+
+        // Forcer le reflow
+        lightboxImageContainer.offsetHeight;
+
+        // Activer la nouvelle image
+        newImg.classList.remove('incoming-right', 'incoming-left');
+        newImg.classList.add('active');
+
+        // Nettoyer après l'animation
+        setTimeout(() => {
+          if (currentImg) {
+            currentImg.remove();
+          }
+          isAnimating = false;
+          console.log('Animation terminée, isAnimating:', isAnimating);
+        }, 300);
 
         lightbox.classList.add('active');
         updateThumbnails();
         targetBody.style.overflow = 'hidden';
-        console.log('Lightbox affiché:', { src: imageSrc, alt: imageAlt, index: currentIndex });
+        console.log('Lightbox affiché:', newImg.alt, 'Index:', currentIndex);
       }
 
       galleryItems.forEach((item, idx) => {
@@ -432,7 +479,7 @@
           e.stopPropagation();
           const visibleImages = getVisibleImages();
           const visibleIndex = visibleImages.indexOf(item);
-          if (visibleIndex !== -1) {
+          if (visibleIndex !== -1 && !isAnimating) {
             showLightbox(visibleIndex);
           }
         });
@@ -449,6 +496,7 @@
           if (activeImg) {
             activeImg.src = '';
             activeImg.alt = '';
+            activeImg.classList.remove('active', 'incoming-left', 'incoming-right', 'outgoing-left', 'outgoing-right');
           }
         } else {
           console.warn('Avertissement : lightboxImageContainer est null lors de la fermeture');
@@ -457,6 +505,7 @@
           thumbnailContainer.innerHTML = '';
         }
         targetBody.style.overflow = '';
+        isAnimating = false;
         console.log('Lightbox fermé');
       }
 
@@ -481,27 +530,29 @@
 
       // Navigation clavier
       targetDocument.addEventListener('keydown', (e) => {
-        if (!lightbox.classList.contains('active')) return;
+        if (!lightbox.classList.contains('active') || isAnimating) return;
         if (e.key === 'Escape') closeLightbox();
         if (e.key === 'ArrowLeft') showPrev();
         if (e.key === 'ArrowRight') showNext();
       });
 
       function showPrev() {
+        if (isAnimating) return;
         const visibleImages = getVisibleImages();
         let idx = currentIndex - 1;
         if (idx < 0) idx = visibleImages.length - 1;
         if (visibleImages[idx]) {
-          showLightbox(idx);
+          showLightbox(idx, 'left');
         }
       }
 
       function showNext() {
+        if (isAnimating) return;
         const visibleImages = getVisibleImages();
         let idx = currentIndex + 1;
         if (idx >= visibleImages.length) idx = 0;
         if (visibleImages[idx]) {
-          showLightbox(idx);
+          showLightbox(idx, 'right');
         }
       }
     }
