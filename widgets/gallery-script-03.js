@@ -129,6 +129,7 @@
         display: flex !important;
         flex-direction: row;
         align-items: center;
+        justify-content: center;
       }
       .lightbox-img {
         width: auto !important;
@@ -139,6 +140,8 @@
         box-shadow: 0 0 30px #111 !important;
         flex-shrink: 0;
         display: block !important;
+        opacity: 1;
+        transform: translateX(0);
         transition: transform 0.3s ease, opacity 0.3s ease !important;
       }
       .lightbox-img.incoming-left {
@@ -150,8 +153,8 @@
         opacity: 0;
       }
       .lightbox-img.active {
-        transform: translateX(0);
-        opacity: 1;
+        transform: translateX(0) !important;
+        opacity: 1 !important;
       }
       .lightbox-img.outgoing-left {
         transform: translateX(-100%);
@@ -373,26 +376,43 @@
       const visibleImages = getVisibleImages();
       currentIndex = index;
 
-      // Nettoyer le conteneur pour l'ouverture initiale
-      if (direction === 'none') {
-        lightboxImageContainer.innerHTML = '';
+      const imageSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
+      const imageAlt = visibleImages[currentIndex].querySelector('img').alt;
+      console.log('Tentative d\'affichage:', { src: imageSrc, alt: imageAlt });
+
+      // Récupérer ou créer l'image active
+      let activeImg = lightboxImageContainer.querySelector('.lightbox-img.active');
+      if (!activeImg) {
+        activeImg = targetDocument.createElement('img');
+        activeImg.className = 'lightbox-img active';
+        lightboxImageContainer.appendChild(activeImg);
       }
 
-      // Créer la nouvelle image
+      // Si ouverture initiale, définir directement l'image
+      if (direction === 'none') {
+        activeImg.src = imageSrc;
+        activeImg.alt = imageAlt;
+        lightbox.classList.add('active');
+        updateThumbnails();
+        targetBody.style.overflow = 'hidden';
+        isAnimating = false;
+        console.log('Image initiale affichée:', { src: imageSrc, alt: imageAlt });
+        return;
+      }
+
+      // Créer une nouvelle image pour la transition
       const newImg = targetDocument.createElement('img');
-      newImg.className = `lightbox-img ${direction === 'right' ? 'incoming-right' : direction === 'left' ? 'incoming-left' : 'active'}`;
-      newImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-      newImg.alt = visibleImages[currentIndex].querySelector('img').alt;
-      console.log('Nouvelle image:', newImg.src, newImg.alt);
+      newImg.className = `lightbox-img ${direction === 'right' ? 'incoming-right' : 'incoming-left'}`;
+      newImg.src = imageSrc;
+      newImg.alt = imageAlt;
 
       // Ajouter la nouvelle image
       lightboxImageContainer.appendChild(newImg);
 
-      // Animer l'ancienne image si nécessaire
-      const currentImg = lightboxImageContainer.querySelector('.lightbox-img.active');
-      if (currentImg && direction !== 'none') {
-        currentImg.classList.remove('active');
-        currentImg.classList.add(direction === 'right' ? 'outgoing-left' : 'outgoing-right');
+      // Animer l'ancienne image
+      if (activeImg) {
+        activeImg.classList.remove('active');
+        activeImg.classList.add(direction === 'right' ? 'outgoing-left' : 'outgoing-right');
       }
 
       // Forcer le reflow
@@ -404,8 +424,8 @@
 
       // Nettoyer après l'animation
       setTimeout(() => {
-        if (currentImg) {
-          currentImg.remove();
+        if (activeImg && activeImg !== newImg) {
+          activeImg.remove();
         }
         isAnimating = false;
         console.log('Animation terminée, isAnimating:', isAnimating);
@@ -414,7 +434,7 @@
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
-      console.log('Lightbox affiché:', newImg.alt, 'Index:', currentIndex);
+      console.log('Lightbox affiché:', { src: newImg.src, alt: newImg.alt, index: currentIndex });
     }
 
     galleryItems.forEach((item, idx) => {
