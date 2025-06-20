@@ -92,103 +92,6 @@
       .filter-button[aria-selected="true"] {
         font-weight: bold !important;
       }
-      .lightbox-overlay {
-        display: none;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(0, 0, 0, 0.85) !important;
-        justify-content: center;
-        align-items: center;
-        z-index: 999999 !important;
-        flex-direction: column;
-      }
-      .lightbox-overlay.active {
-        display: flex !important;
-      }
-      .lightbox-img {
-        max-width: 90vw !important;
-        max-height: 70vh !important;
-        object-fit: contain !important;
-        border-radius: 8px !important;
-        box-shadow: 0 0 30px #111 !important;
-        display: block !important;
-        margin: 0 auto !important;
-        transition: opacity 0.4s ease, transform 0.4s ease !important;
-      }
-      .lightbox-img.fading {
-        opacity: 0;
-        transform: translateX(20px);
-      }
-      .lightbox-arrow {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.7) !important;
-        border: none !important;
-        font-size: 2rem !important;
-        cursor: pointer !important;
-        padding: 8px 18px !important;
-        border-radius: 50% !important;
-        z-index: 1000000 !important;
-        color: #222 !important;
-        transition: background 0.2s !important;
-      }
-      .lightbox-arrow:hover {
-        background: #fff !important;
-      }
-      .lightbox-arrow.prev {
-        left: 2vw !important;
-      }
-      .lightbox-arrow.next {
-        right: 2vw !important;
-      }
-      .lightbox-close {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: rgba(255, 255, 255, 0.7) !important;
-        border: none !important;
-        font-size: 1.5rem !important;
-        cursor: pointer !important;
-        padding: 5px 10px !important;
-        border-radius: 50% !important;
-        z-index: 1000000 !important;
-        color: #222 !important;
-        transition: background 0.2s !important;
-      }
-      .lightbox-close:hover {
-        background: #fff !important;
-      }
-      .thumbnail-container {
-        display: flex !important;
-        justify-content: center !important;
-        gap: 10px !important;
-        margin-top: 10px !important;
-        overflow-x: auto !important;
-        max-width: 90vw !important;
-        padding: 10px 0 !important;
-      }
-      .thumbnail {
-        width: 60px !important;
-        height: 60px !important;
-        object-fit: cover !important;
-        border-radius: 4px !important;
-        cursor: pointer !important;
-        opacity: 0.6 !important;
-        transition: opacity 0.3s !important;
-      }
-      .thumbnail.active {
-        opacity: 1 !important;
-        border: 2px solid #007bff !important;
-      }
-      .thumbnail:hover {
-        opacity: 1 !important;
-      }
       @media (max-width: 768px) {
         .gallery-grid {
           grid-template-columns: repeat(auto-fill, 150px) !important;
@@ -207,20 +110,6 @@
           height: 100% !important;
           object-fit: cover !important;
           border-radius: 8px !important;
-        }
-        .lightbox-img {
-          max-width: 98vw !important;
-          max-height: 60vh !important;
-        }
-        .lightbox-arrow.prev {
-          left: 10px !important;
-        }
-        .lightbox-arrow.next {
-          right: 10px !important;
-        }
-        .thumbnail {
-          width: 50px !important;
-          height: 50px !important;
         }
       }
     `;
@@ -326,6 +215,22 @@
       .thumbnail:hover {
         opacity: 1 !important;
       }
+      @media (max-width: 768px) {
+        .lightbox-img {
+          max-width: 98vw !important;
+          max-height: 60vh !important;
+        }
+        .lightbox-arrow.prev {
+          left: 10px !important;
+        }
+        .lightbox-arrow.next {
+          right: 10px !important;
+        }
+        .thumbnail {
+          width: 50px !important;
+          height: 50px !important;
+        }
+      }
     `;
     targetDocument.head.appendChild(parentStyle);
 
@@ -429,9 +334,9 @@
     function getVisibleImages() {
       const visibleImages = Array.from(galleryItems).filter(item => {
         const style = window.getComputedStyle(item);
-        return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
+        return style.display !== 'none' && style.opacity !== '0' && !item.classList.contains('mixitup-hidden');
       });
-      console.log('Visible images:', visibleImages.map(item => item.querySelector('img').alt));
+      console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').alt));
       return visibleImages;
     }
 
@@ -456,7 +361,7 @@
     function showLightbox(index, direction = 'none') {
       const visibleImages = getVisibleImages();
       if (isAnimating || index < 0 || index >= visibleImages.length || !lightboxImg) {
-        console.warn('Animation en cours, index hors limites, ou lightboxImg null:', index, isAnimating);
+        console.warn('Animation en cours, index hors limites, ou lightboxImg null:', { index, isAnimating, visibleImagesLength: visibleImages.length });
         isAnimating = false;
         return;
       }
@@ -477,7 +382,7 @@
         lightboxImg.style.transform = 'translateX(0)';
         isAnimating = false;
         console.log('Animation terminée, isAnimating:', isAnimating);
-      }, 400);
+      }, direction === 'none' ? 0 : 400);
 
       lightbox.classList.add('active');
       updateThumbnails();
