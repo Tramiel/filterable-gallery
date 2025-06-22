@@ -221,7 +221,12 @@
         }
       }
     `;
-    targetDocument.head.appendChild(parentStyle);
+    try {
+      targetDocument.head.appendChild(parentStyle);
+      console.log('Styles du lightbox injectés dans le DOM parent');
+    } catch (e) {
+      console.error('Erreur lors de l\'injection des styles du lightbox:', e);
+    }
 
     // Injecter le HTML
     galleryContainer.innerHTML = `
@@ -252,22 +257,35 @@
       </div>
     `;
     galleryContainer.classList.add('loaded');
+    console.log('Galerie HTML injectée');
 
     // Précharger les images pleine résolution
-    const galleryItems = galleryContainer.querySelectorAll('.gallery-item img');
-    galleryItems.forEach(item => {
-      const preloadLink = localDocument.createElement('link');
-      preloadLink.rel = 'preload';
-      preloadLink.as = 'image';
-      preloadLink.href = item.getAttribute('data-full');
-      localDocument.head.appendChild(preloadLink);
-    });
-    console.log('Images préchargées:', Array.from(galleryItems).map(item => item.getAttribute('data-full')));
+    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
+    if (galleryItems.length === 0) {
+      console.warn('Aucun .gallery-item trouvé dans .gallery-grid');
+    } else {
+      const preloadImages = [];
+      galleryItems.forEach(item => {
+        const img = item.querySelector('img');
+        if (img) {
+          const preloadLink = localDocument.createElement('link');
+          preloadLink.rel = 'preload';
+          preloadLink.as = 'image';
+          preloadLink.href = img.getAttribute('data-full');
+          localDocument.head.appendChild(preloadLink);
+          preloadImages.push(img.getAttribute('data-full'));
+        } else {
+          console.warn('Image manquante dans .gallery-item:', item);
+        }
+      });
+      console.log('Images préchargées:', preloadImages);
+    }
 
     // Charger MixItUp
     const script = localDocument.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
     script.onload = function() {
+      console.log('MixItUp chargé');
       // Initialiser MixItUp
       mixitup('.gallery-grid', {
         selectors: {
@@ -284,6 +302,7 @@
       const filterButtons = galleryContainer.querySelectorAll('.filter-button');
       filterButtons.forEach(button => {
         button.addEventListener('click', function() {
+          console.log('Filtre cliqué:', button.getAttribute('data-filter'));
           filterButtons.forEach(btn => {
             btn.classList.remove('active');
             btn.setAttribute('aria-selected', 'false');
@@ -324,35 +343,46 @@
       const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
       const closeBtn = lightbox.querySelector('.lightbox-close');
       const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
-      let currentIndex = 0;
-      let isAnimating = false;
 
       if (!lightboxImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
         console.error('Erreur : Éléments du lightbox manquants', { lightboxImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
         throw new Error('Éléments du lightbox manquants');
       }
 
+      let currentIndex = 0;
+      let isAnimating = false;
+
       function getVisibleImages() {
         const visibleImages = Array.from(galleryItems).filter(item => {
           const style = window.getComputedStyle(item);
           return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
         });
-        console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').alt));
+        console.log('Images visibles:', visibleImages.map(item => {
+          const img = item.querySelector('img');
+          return img ? img.alt : 'Image manquante';
+        }));
         return visibleImages;
       }
 
       function updateThumbnails() {
         if (!thumbnailContainer) return;
-        thumbnailContainer.innerHTML = getVisibleImages().map((item, idx) => `
-          <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
-               src="${item.querySelector('img').src}" 
-               alt="${item.querySelector('img').alt}" 
-               data-index="${idx}">
-        `).join('');
+        thumbnailContainer.innerHTML = getVisibleImages().map((item, idx) => {
+          const img = item.querySelector('img');
+          if (img) {
+            return `
+              <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
+                   src="${img.src}" 
+                   alt="${img.alt}" 
+                   data-index="${idx}">
+            `;
+          }
+          return '';
+        }).join('');
         thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
           thumb.addEventListener('click', () => {
             if (!isAnimating) {
               const newIndex = parseInt(thumb.getAttribute('data-index'));
+              console.log('Clic sur vignette:', thumb.alt, 'Index:', newIndex);
               showLightbox(newIndex, newIndex > currentIndex ? 'right' : 'left');
             }
           });
@@ -368,19 +398,25 @@
         isAnimating = true;
         const visibleImages = getVisibleImages();
         currentIndex = index;
+        const currentImg = visibleImages[currentIndex].querySelector('img');
+        if (!currentImg) {
+          console.error('Image manquante pour l\'index:', currentIndex);
+          isAnimating = false;
+          return;
+        }
 
         if (direction === 'none') {
           // Affichage immédiat pour la première image
-          lightboxImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-          lightboxImg.alt = visibleImages[currentIndex].querySelector('img').alt;
+          lightboxImg.src = currentImg.getAttribute('data-full');
+          lightboxImg.alt = currentImg.alt;
           lightboxImg.classList.remove('fading');
           isAnimating = false;
         } else {
           // Transition fluide pour les images suivantes
           lightboxImg.classList.add('fading');
           setTimeout(() => {
-            lightboxImg.src = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-            lightboxImg.alt = visibleImages[currentIndex].querySelector('img').alt;
+            lightboxImg.src = currentImg.getAttribute('data-full');
+            lightboxImg.alt = currentImg.alt;
             lightboxImg.classList.remove('fading');
             isAnimating = false;
             console.log('Animation terminée, isAnimating:', isAnimating);
@@ -396,15 +432,21 @@
       // Attacher les gestionnaires d'événements
       galleryItems.forEach((item, idx) => {
         const img = item.querySelector('img');
-        img.addEventListener('click', (e) => {
-          e.stopPropagation();
-          console.log('Clic sur image:', img.alt, 'Index:', idx);
-          const visibleImages = getVisibleImages();
-          const visibleIndex = visibleImages.indexOf(item);
-          if (visibleIndex !== -1 && !isAnimating) {
-            showLightbox(visibleIndex);
-          }
-        });
+        if (img) {
+          img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Clic sur image:', img.alt, 'Index:', idx);
+            const visibleImages = getVisibleImages();
+            const visibleIndex = visibleImages.indexOf(item);
+            if (visibleIndex !== -1 && !isAnimating) {
+              showLightbox(visibleIndex);
+            } else {
+              console.warn('Image non visible ou animation en cours:', visibleIndex, isAnimating);
+            }
+          });
+        } else {
+          console.warn('Image manquante dans .gallery-item à l\'index:', idx);
+        }
       });
 
       function closeLightbox() {
@@ -427,29 +469,44 @@
 
       prevBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Clic sur flèche précédente');
         showPrev();
       });
 
       nextBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Clic sur flèche suivante');
         showNext();
       });
 
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Clic sur bouton fermer');
         closeLightbox();
       });
 
       lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) closeLightbox();
+        if (e.target === lightbox) {
+          console.log('Clic sur l\'overlay pour fermer');
+          closeLightbox();
+        }
       });
 
       // Navigation clavier
       targetDocument.addEventListener('keydown', (e) => {
         if (!lightbox.classList.contains('active') || isAnimating) return;
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowLeft') showPrev();
-        if (e.key === 'ArrowRight') showNext();
+        if (e.key === 'Escape') {
+          console.log('Touche Échap pressée');
+          closeLightbox();
+        }
+        if (e.key === 'ArrowLeft') {
+          console.log('Touche flèche gauche pressée');
+          showPrev();
+        }
+        if (e.key === 'ArrowRight') {
+          console.log('Touche flèche droite pressée');
+          showNext();
+        }
       });
 
       function showPrev() {
@@ -475,8 +532,8 @@
 
     // Tenter d'initialiser le lightbox avec retry
     let retryCount = 0;
-    const maxRetries = 5;
-    const retryDelay = 100;
+    const maxRetries = 10;
+    const retryDelay = 200;
 
     function tryInitializeLightbox() {
       try {
@@ -501,6 +558,7 @@
       const updateHeight = () => {
         const height = galleryContainer.offsetHeight;
         window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
+        console.log('Hauteur iframe mise à jour:', height);
       };
       new ResizeObserver(updateHeight).observe(galleryContainer);
       updateHeight();
