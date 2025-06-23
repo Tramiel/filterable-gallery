@@ -1,9 +1,9 @@
 (function() {
-  document.addEventListener', 'DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     // Trouver le conteneur
     const galleryContainer = document.querySelector('.custom-gallery');
     if (!galleryContainer) {
-      console.error('Conteneur .custom-gallery non trouvé.');
+      console.warn('Conteneur .custom-gallery non trouvé.');
       return;
     }
 
@@ -24,8 +24,8 @@
       }
       .filter-buttons {
         text-align: center;
-        margin: 20px !important;
-        padding: 10px !important;
+        margin: 20px 0 !important;
+        padding: 10px 0 !important;
       }
       .filter-button {
         padding: 8px 20px !important;
@@ -35,7 +35,7 @@
         cursor: pointer !important;
         border-radius: 4px !important;
         font-size: 16px !important;
-        transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease !important;
+        transition: background 0.3s, color 0.3s, transform 0.1s !important;
       }
       .filter-button:hover {
         background: #e0e0e0 !important;
@@ -114,8 +114,8 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.4s ease, opacity 0.4s ease !important; /* AJOUT : Transition opacity */
-        will-change: transform, opacity; /* AJOUT : Optimisation performance */
+        transition: transform 0.4s ease, opacity 0.4s ease !important;
+        will-change: transform, opacity;
         transform: translateX(0);
         opacity: 1;
       }
@@ -123,24 +123,24 @@
         z-index: 1;
       }
       .lightbox-img.next {
-        transform: translateX(100%); /* Position initiale à droite */
-        opacity: 0; /* AJOUT : Masquer initialement */
+        transform: translateX(100%);
+        opacity: 0;
       }
       .lightbox-img.to-left {
-        transform: translateX(-100%); /* Sort à gauche */
-        opacity: 0; /* AJOUT : Masquer pendant la sortie */
+        transform: translateX(-100%);
+        opacity: 0;
       }
       .lightbox-img.from-right {
-        transform: translateX(0); /* Entre depuis la droite */
-        opacity: 1; /* AJOUT : Visible à l'arrivée */
+        transform: translateX(0);
+        opacity: 1;
       }
       .lightbox-img.to-right {
-        transform: translateX(100%); /* Sort à droite */
-        opacity: 0; /* AJOUT : Masquer pendant la sortie */
+        transform: translateX(100%);
+        opacity: 0;
       }
       .lightbox-img.from-left {
-        transform: translateX(0); /* Entre depuis la gauche */
-        opacity: 1; /* AJOUT : Visible à l'arrivée */
+        transform: translateX(0);
+        opacity: 1;
       }
       .lightbox-arrow {
         position: absolute;
@@ -402,19 +402,19 @@
       <div class="gallery-grid">
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=800" 
+               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=800"
                alt="Coiffure élégante pour mariage" 
                title="Coiffure élégante pour mariage">
         </div>
         <div class="gallery-item mix soiree">
           <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800" 
+               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800"
                alt="Coiffure glamour pour soirée" 
                title="Coiffure glamour pour soirée">
         </div>
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800" 
+               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800"
                alt="Coiffure romantique pour mariage" 
                title="Coiffure romantique pour mariage">
         </div>
