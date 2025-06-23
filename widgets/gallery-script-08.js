@@ -228,9 +228,12 @@
     `;
     localDocument.head.appendChild(style);
 
-    // Supprimer les styles en double dans le DOM parent
+    // Injecter les styles du lightbox dans le DOM parent
     try {
+      const existingStyles = targetDocument.querySelectorAll('style[data-gallery]');
+      existingStyles.forEach(style => style.remove());
       const parentStyle = targetDocument.createElement('style');
+      parentStyle.setAttribute('data-gallery', 'true');
       parentStyle.textContent = `
         .lightbox-overlay {
           display: none;
@@ -414,9 +417,14 @@
       });
 
       // Mettre à jour les images visibles après filtrage
-      mixer.on('mixEnd', function(state) {
-        console.log('Filtrage terminé, images visibles mises à jour');
-      });
+      if (typeof mixer.on === 'function') {
+        mixer.on('mixEnd', function(state) {
+          console.log('Filtrage terminé, images visibles mises à jour');
+          updateVisibleImages();
+        });
+      } else {
+        console.warn('mixer.on n\'est pas une fonction, événement mixEnd non attaché');
+      }
 
       // Gérer les boutons de filtrage
       const filterButtons = galleryContainer.querySelectorAll('.filter-button');
