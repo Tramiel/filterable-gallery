@@ -95,18 +95,7 @@
       .lightbox-overlay.active {
         display: flex !important;
       }
-      .lightbox-image-container {
-        position: relative;
-        width: 90vw !important;
-        height: 70vh !important;
-        overflow: hidden !important;
-      }
       .lightbox-img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100% !important;
-        height: 100% !important;
         max-width: 90vw !important;
         max-height: 70vh !important;
         object-fit: contain !important;
@@ -114,33 +103,11 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.3s ease, opacity 0.3s ease !important;
-        will-change: transform, opacity;
-        transform: translateX(0);
-        opacity: 1;
+        opacity: 0; /* AJOUT : Opacité initiale pour transition */
+        transition: opacity 0.4s ease !important; /* AJOUT : Transition fluide */
       }
-      .lightbox-img.current {
-        z-index: 1;
-      }
-      .lightbox-img.next {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      .lightbox-img.to-left {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      .lightbox-img.from-right {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      .lightbox-img.to-right {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      .lightbox-img.from-left {
-        transform: translateX(0);
-        opacity: 1;
+      .lightbox-img.active {
+        opacity: 1; /* AJOUT : Opacité complète pour l'image active */
       }
       .lightbox-arrow {
         position: absolute;
@@ -226,10 +193,6 @@
           object-fit: cover !important;
           border-radius: 8px !important;
         }
-        .lightbox-image-container {
-          width: 98vw !important;
-          height: 60vh !important;
-        }
         .lightbox-img {
           max-width: 98vw !important;
           max-height: 60vh !important;
@@ -250,7 +213,7 @@
 
     // Injecter les styles du lightbox dans le DOM parent
     const parentStyle = targetDocument.createElement('style');
-    parentStyle.setAttribute('data-gallery', 'true');
+    parentStyle.setAttribute('data-gallery', 'true'); // AJOUT : Identifiant pour éviter doublons
     parentStyle.textContent = `
       .lightbox-overlay {
         display: none;
@@ -270,18 +233,7 @@
       .lightbox-overlay.active {
         display: flex !important;
       }
-      .lightbox-image-container {
-        position: relative;
-        width: 90vw !important;
-        height: 70vh !important;
-        overflow: hidden !important;
-      }
       .lightbox-img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100% !important;
-        height: 100% !important;
         max-width: 90vw !important;
         max-height: 70vh !important;
         object-fit: contain !important;
@@ -289,33 +241,11 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.3s ease, opacity 0.3s ease !important;
-        will-change: transform, opacity;
-        transform: translateX(0);
-        opacity: 1;
+        opacity: 0; /* AJOUT : Opacité initiale pour transition */
+        transition: opacity 0.4s ease !important; /* AJOUT : Transition fluide */
       }
-      .lightbox-img.current {
-        z-index: 1;
-      }
-      .lightbox-img.next {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      .lightbox-img.to-left {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      .lightbox-img.from-right {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      .lightbox-img.to-right {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      .lightbox-img.from-left {
-        transform: translateX(0);
-        opacity: 1;
+      .lightbox-img.active {
+        opacity: 1; /* AJOUT : Opacité complète pour l'image active */
       }
       .lightbox-arrow {
         position: absolute;
@@ -343,17 +273,16 @@
       .lightbox-close {
         position: absolute;
         top: 20px;
-        right: 25px;
+        right: 20px;
         background: rgba(255, 255, 255, 0.7) !important;
         border: none !important;
-        font-size: 28px !important;
+        font-size: 1.5rem !important;
         cursor: pointer !important;
-        padding: 0px 7px 2px !important;
+        padding: 5px 10px !important;
         border-radius: 50% !important;
         z-index: 1000000 !important;
         color: #222 !important;
         transition: background 0.2s !important;
-        line-height: 28px;
       }
       .lightbox-close:hover {
         background: #fff !important;
@@ -386,7 +315,7 @@
     `;
     try {
       const existingStyles = targetDocument.querySelectorAll('style[data-gallery]');
-      existingStyles.forEach(style => style.remove());
+      existingStyles.forEach(style => style.remove()); // AJOUT : Supprimer les styles en double
       targetDocument.head.appendChild(parentStyle);
       console.log('Styles du lightbox injectés dans le DOM parent');
     } catch (e) {
@@ -403,25 +332,25 @@
       <div class="gallery-grid">
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=800"
+               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224"
                alt="Coiffure élégante pour mariage" 
                title="Coiffure élégante pour mariage">
         </div>
         <div class="gallery-item mix soiree">
           <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800"
+               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224"
                alt="Coiffure glamour pour soirée" 
                title="Coiffure glamour pour soirée">
         </div>
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800"
+               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224"
                alt="Coiffure romantique pour mariage" 
                title="Coiffure romantique pour mariage">
         </div>
       </div>
     `;
-    galleryContainer.classList.add('loaded');
+    galleryContainer.classList.add('loaded'); // AJOUT : Marquer la galerie comme chargée
 
     // Précharger les images pleine résolution (asynchrone)
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
@@ -440,36 +369,38 @@
           console.warn('Image manquante dans .gallery-item:', item);
         }
       });
-      console.log('Images préchargées:', preloadImages);
+      console.log('Images préchargées:', preloadImages); // AJOUT : Log pour débogage
     }
 
     // Charger MixItUp
     const script = localDocument.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
     script.onload = function() {
-      console.log('MixItUp chargé');
+      console.log('MixItUp chargé'); // AJOUT : Log pour débogage
+      // Initialiser MixItUp
       const mixer = mixitup('.gallery-grid', {
         selectors: {
           target: '.gallery-item'
         },
         animation: {
           duration: 300,
-          effects: 'fade translateZ(-150px)',
+          effects: 'fade translateZ(-360px) translateY(20px)',
           easing: 'ease'
         }
       });
 
+      // Gérer les boutons de filtrage
       const filterButtons = galleryContainer.querySelectorAll('.filter-button');
       filterButtons.forEach(button => {
         button.addEventListener('click', function() {
-          console.log('Filtre cliqué:', button.getAttribute('data-filter'));
+          console.log('Filtre cliqué:', button.getAttribute('data-filter')); // AJOUT : Log pour débogage
           filterButtons.forEach(btn => {
             btn.classList.remove('active');
             btn.setAttribute('aria-selected', 'false');
           });
           this.classList.add('active');
           this.setAttribute('aria-selected', 'true');
-          setTimeout(getVisibleImages, 310);
+          setTimeout(getVisibleImages, 310); // AJOUT : Mettre à jour les images visibles après filtrage
         });
       });
     };
@@ -483,17 +414,14 @@
         lightbox.className = 'lightbox-overlay';
         lightbox.id = 'global-lightbox';
         lightbox.innerHTML = `
-          <button class="lightbox-close" aria-label="Fermer">×</button>
-          <button class="lightbox-arrow prev" aria-label="Précédente">←</button>
-          <div class="lightbox-image-container">
-            <img class="lightbox-img current" src="" alt="">
-            <img class="lightbox-img next" src="" alt="">
-          </div>
-          <button class="lightbox-arrow next" aria-label="Suivante">→</button>
+          <button class="lightbox-close" title="Fermer">×</button>
+          <button class="lightbox-arrow prev" title="Précédente">←</button>
+          <img class="lightbox-img" src="" alt="">
+          <button class="lightbox-arrow next" title="Suivante">→</button>
           <div class="thumbnail-container"></div>
         `;
         targetBody.appendChild(lightbox);
-        console.log('Lightbox créé dans le DOM parent');
+        console.log('Lightbox créé dans le DOM parent'); // AJOUT : Log pour débogage
       } catch (e) {
         console.error('Erreur lors de la création du lightbox:', e);
         return;
@@ -501,35 +429,17 @@
     }
 
     // Initialisation du lightbox
-    const lightboxImageContainer = lightbox.querySelector('.lightbox-image-container');
-    const currentImg = lightbox.querySelector('.lightbox-img.current');
-    const nextImg = lightbox.querySelector('.lightbox-img.next');
+    const lightboxImg = lightbox.querySelector('.lightbox-img');
     const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
     const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
     const closeBtn = lightbox.querySelector('.lightbox-close');
     const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
     let currentIndex = 0;
-    let isAnimating = false;
+    let isAnimating = false; // AJOUT : Empêcher les clics multiples pendant la transition
 
-    if (!lightboxImageContainer || !currentImg || !nextImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
-      console.error('Erreur : Éléments du lightbox manquants', { lightboxImageContainer, currentImg, nextImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
+    if (!lightboxImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
+      console.error('Erreur : Éléments du lightbox manquants', { lightboxImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
       return;
-    }
-
-    // Précharger l'image suivante et précédente
-    function preloadAdjacentImages(index) {
-      const visibleImages = getVisibleImages();
-      const prevIndex = (index - 1 + visibleImages.length) % visibleImages.length;
-      const nextIndex = (index + 1) % visibleImages.length;
-      const urls = [
-        visibleImages[prevIndex]?.querySelector('img')?.getAttribute('data-full'),
-        visibleImages[nextIndex]?.querySelector('img')?.getAttribute('data-full')
-      ].filter(Boolean);
-      urls.forEach(url => {
-        const img = new Image();
-        img.src = url;
-        console.log('Préchargement adjacent:', url);
-      });
     }
 
     function getVisibleImages() {
@@ -552,96 +462,38 @@
       thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
         thumb.addEventListener('click', () => {
           if (!isAnimating) {
-            console.log('Clic sur vignette:', thumb.alt, 'Index:', thumb.getAttribute('data-index'));
-            const newIndex = parseInt(thumb.getAttribute('data-index'));
-            const direction = newIndex > currentIndex ? 'next' : newIndex < currentIndex ? 'prev' : 'none';
-            showLightbox(newIndex, direction);
+            console.log('Clic sur vignette:', thumb.alt, 'Index:', thumb.getAttribute('data-index')); // AJOUT : Log pour débogage
+            showLightbox(parseInt(thumb.getAttribute('data-index')));
           }
         });
       });
     }
 
-    function showLightbox(index, direction = 'none') {
+    function showLightbox(index) {
       if (isAnimating || index < 0 || index >= getVisibleImages().length) {
-        console.warn('Index hors limites ou animation en cours:', index, direction);
+        console.warn('Animation en cours ou index hors limites:', index, isAnimating);
         isAnimating = false;
         return;
       }
       isAnimating = true;
       const visibleImages = getVisibleImages();
       currentIndex = index;
-      const newSrc = visibleImages[currentIndex]?.querySelector('img')?.getAttribute('data-full');
-      const newAlt = visibleImages[currentIndex]?.querySelector('img')?.alt;
+      const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
+      const newAlt = visibleImages[currentIndex].querySelector('img').alt;
 
-      if (!newSrc || !newAlt) {
-        console.error('Erreur : données manquantes pour l’image à l’index', index);
+      // Appliquer la transition fluide
+      lightboxImg.classList.remove('active');
+      setTimeout(() => {
+        lightboxImg.src = newSrc;
+        lightboxImg.alt = newAlt;
+        lightboxImg.classList.add('active');
         isAnimating = false;
-        return;
-      }
-
-      // Précharger les images
-      preloadAdjacentImages(currentIndex);
-
-      // Réinitialiser les classes et styles
-      currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
-      nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
-      nextImg.style.transform = direction === 'next' ? 'translateX(-100%)' : 'translateX(100%)';
-      nextImg.style.opacity = '0';
-      console.log('Initialisation transition:', {
-        direction,
-        nextTransform: nextImg.style.transform,
-        nextClasses: nextImg.className
-      });
-
-      if (direction === 'none') {
-        // Pas de transition pour la première ouverture
-        currentImg.src = newSrc;
-        currentImg.alt = newAlt;
-        currentImg.classList.add('current');
-        nextImg.src = '';
-        nextImg.alt = '';
-        isAnimating = false;
-        console.log('Lightbox affiché sans animation:', newAlt, 'Index:', currentIndex);
-      } else {
-        // Charger l'image suivante
-        nextImg.src = newSrc;
-        nextImg.alt = newAlt;
-        if (direction === 'next') {
-          currentImg.classList.add('to-left'); // Actuelle sort à gauche
-          nextImg.classList.add('from-left'); // Suivante entre depuis la gauche
-          console.log('Transition next: actuelle → gauche, prochaine → gauche', {
-            currentClasses: currentImg.className,
-            nextClasses: nextImg.className
-          });
-        } else if (direction === 'prev') {
-          currentImg.classList.add('to-right'); // Actuelle sort à droite
-          nextImg.classList.add('from-right'); // Précédente entre depuis la droite
-          console.log('Transition prev: actuelle → droite, précédente → droite', {
-            currentClasses: currentImg.className,
-            nextClasses: nextImg.className
-          });
-        }
-        setTimeout(() => {
-          currentImg.src = newSrc;
-          currentImg.alt = newAlt;
-          currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
-          currentImg.classList.add('current');
-          nextImg.src = '';
-          nextImg.alt = '';
-          nextImg.style.transform = 'translateX(100%)';
-          nextImg.style.opacity = '0';
-          isAnimating = false;
-          console.log('Transition terminée:', newAlt, 'Direction:', direction, {
-            finalCurrentClasses: currentImg.className,
-            finalNextClasses: nextImg.className
-          });
-        }, 300);
-      }
+        console.log('Affichage image:', lightboxImg.alt, 'Index:', currentIndex);
+      }, 400);
 
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
-      console.log('Lightbox affiché:', newAlt, currentIndex, direction);
     }
 
     galleryItems.forEach((item, idx) => {
@@ -649,74 +501,74 @@
       if (img) {
         img.addEventListener('click', (e) => {
           e.stopPropagation();
-          console.log('Clic sur image:', img.alt, idx);
+          console.log('Clic sur image:', img.alt, 'Index:', idx); // AJOUT : Log pour débogage
           const visibleImages = getVisibleImages();
           const visibleIndex = visibleImages.indexOf(item);
           if (visibleIndex !== -1 && !isAnimating) {
-            showLightbox(visibleIndex, 'none');
+            showLightbox(visibleIndex);
           } else {
             console.warn('Image non visible ou animation en cours:', visibleIndex, isAnimating);
           }
         });
       } else {
-        console.warn('Image manquante dans .gallery-item à l’index:', idx);
+        console.warn('Image manquante dans .gallery-item à l\'index:', idx);
       }
     });
 
     function closeLightbox() {
       lightbox.classList.remove('active');
-      currentImg.src = '';
-      currentImg.alt = '';
-      nextImg.src = '';
-      nextImg.alt = '';
-      currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right', 'current');
-      nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
-      nextImg.style.transform = 'translateX(100%)';
-      nextImg.style.opacity = '0';
+      lightboxImg.src = '';
+      lightboxImg.alt = '';
+      lightboxImg.classList.remove('active'); // AJOUT : Réinitialiser l'opacité
       thumbnailContainer.innerHTML = '';
       targetBody.style.overflow = '';
       isAnimating = false;
-      console.log('Lightbox fermé');
+      console.log('Lightbox fermé'); // AJOUT : Log pour débogage
     }
 
     function showPrev() {
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
-      let idx = (currentIndex - 1 + visibleImages.length) % visibleImages.length;
-      console.log('Affichage image précédente:', idx);
-      showLightbox(idx, 'prev');
+      let idx = currentIndex - 1;
+      if (idx < 0) idx = visibleImages.length - 1;
+      if (visibleImages[idx]) {
+        console.log('Affichage image précédente:', idx); // AJOUT : Log pour débogage
+        showLightbox(idx);
+      }
     }
 
     function showNext() {
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
-      let idx = (currentIndex + 1) % visibleImages.length;
-      console.log('Affichage image suivante:', idx);
-      showLightbox(idx, 'next');
+      let idx = currentIndex + 1;
+      if (idx >= visibleImages.length) idx = 0;
+      if (visibleImages[idx]) {
+        console.log('Affichage image suivante:', idx); // AJOUT : Log pour débogage
+        showLightbox(idx);
+      }
     }
 
     prevBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('Clic sur flèche précédente');
+      console.log('Clic sur flèche précédente'); // AJOUT : Log pour débogage
       showPrev();
     });
 
     nextBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('Clic sur flèche suivante');
+      console.log('Clic sur flèche suivante'); // AJOUT : Log pour débogage
       showNext();
     });
 
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      console.log('Clic sur bouton fermer');
+      console.log('Clic sur bouton fermer'); // AJOUT : Log pour débogage
       closeLightbox();
     });
 
     lightbox.addEventListener('click', (e) => {
-      const target = e.target;
-      if (target === lightbox || target.closest('.lightbox-image-container')) {
-        console.log('Clic sur overlay ou image-container pour fermer');
+      if (e.target === lightbox) {
+        console.log('Clic sur l\'overlay pour fermer'); // AJOUT : Log pour débogage
         closeLightbox();
       }
     });
@@ -725,28 +577,28 @@
     targetDocument.addEventListener('keydown', (e) => {
       if (!lightbox.classList.contains('active') || isAnimating) return;
       if (e.key === 'Escape') {
-        console.log('Touche Échap');
+        console.log('Touche Échap pressée'); // AJOUT : Log pour débogage
         closeLightbox();
       }
       if (e.key === 'ArrowLeft') {
-        console.log('Clavier : flèche gauche');
+        console.log('Touche flèche gauche pressée'); // AJOUT : Log pour débogage
         showPrev();
       }
       if (e.key === 'ArrowRight') {
-        console.log('Clavier : flèche droite');
+        console.log('Touche flèche droite pressée'); // AJOUT : Log pour débogage
         showNext();
       }
     });
 
-    // Ajuster la hauteur de l’iframe
+    // Ajuster la hauteur de l'iframe
     if (isInIframe) {
       const updateHeight = () => {
         const height = galleryContainer.offsetHeight;
         try {
           window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
-          console.log('Hauteur iframe:', height);
+          console.log('Hauteur iframe mise à jour:', height); // AJOUT : Log pour débogage
         } catch (e) {
-          console.error('Erreur hauteur iframe:', e);
+          console.error('Erreur lors de l\'envoi de la hauteur iframe:', e);
         }
       };
       new ResizeObserver(updateHeight).observe(galleryContainer);
