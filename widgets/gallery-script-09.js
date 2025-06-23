@@ -100,11 +100,9 @@
         width: 90vw !important;
         height: 70vh !important;
         overflow: hidden !important;
+        transition: transform 0.4s ease !important; /* AJOUT : Transition sur le conteneur */
       }
       .lightbox-img {
-        position: absolute;
-        top: 0;
-        left: 0;
         width: 100% !important;
         height: 100% !important;
         max-width: 90vw !important;
@@ -114,26 +112,12 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.4s ease !important;
-        transform: translateX(0);
       }
-      .lightbox-img.current {
-        z-index: 1;
+      .lightbox-image-container.slide-left {
+        transform: translateX(-100%); /* AJOUT : Défilement vers la gauche */
       }
-      .lightbox-img.next {
-        transform: translateX(100%); /* MODIFICATION : Position initiale à droite */
-      }
-      .lightbox-img.current.to-left {
-        transform: translateX(-100%); /* MODIFICATION : Image actuelle sort à gauche */
-      }
-      .lightbox-img.next.from-right {
-        transform: translateX(0); /* MODIFICATION : Image suivante entre depuis la droite */
-      }
-      .lightbox-img.current.to-right {
-        transform: translateX(100%); /* MODIFICATION : Image actuelle sort à droite */
-      }
-      .lightbox-img.next.from-left {
-        transform: translateX(0); /* MODIFICATION : Image suivante entre depuis la gauche */
+      .lightbox-image-container.slide-right {
+        transform: translateX(100%); /* AJOUT : Défilement vers la droite */
       }
       .lightbox-arrow {
         position: absolute;
@@ -268,11 +252,9 @@
         width: 90vw !important;
         height: 70vh !important;
         overflow: hidden !important;
+        transition: transform 0.4s ease !important;
       }
       .lightbox-img {
-        position: absolute;
-        top: 0;
-        left: 0;
         width: 100% !important;
         height: 100% !important;
         max-width: 90vw !important;
@@ -282,26 +264,12 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.4s ease !important;
-        transform: translateX(0);
       }
-      .lightbox-img.current {
-        z-index: 1;
-      }
-      .lightbox-img.next {
-        transform: translateX(100%);
-      }
-      .lightbox-img.current.to-left {
+      .lightbox-image-container.slide-left {
         transform: translateX(-100%);
       }
-      .lightbox-img.next.from-right {
-        transform: translateX(0);
-      }
-      .lightbox-img.current.to-right {
+      .lightbox-image-container.slide-right {
         transform: translateX(100%);
-      }
-      .lightbox-img.next.from-left {
-        transform: translateX(0);
       }
       .lightbox-arrow {
         position: absolute;
@@ -471,8 +439,7 @@
           <button class="lightbox-close" title="Fermer">×</button>
           <button class="lightbox-arrow prev" title="Précédente">←</button>
           <div class="lightbox-image-container">
-            <img class="lightbox-img current" src="" alt="">
-            <img class="lightbox-img next" src="" alt="">
+            <img class="lightbox-img" src="" alt="">
           </div>
           <button class="lightbox-arrow next" title="Suivante">→</button>
           <div class="thumbnail-container"></div>
@@ -487,8 +454,7 @@
 
     // Initialisation du lightbox
     const lightboxImageContainer = lightbox.querySelector('.lightbox-image-container');
-    const currentImg = lightbox.querySelector('.lightbox-img.current');
-    const nextImg = lightbox.querySelector('.lightbox-img.next');
+    const lightboxImg = lightbox.querySelector('.lightbox-img');
     const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
     const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
     const closeBtn = lightbox.querySelector('.lightbox-close');
@@ -496,8 +462,8 @@
     let currentIndex = 0;
     let isAnimating = false;
 
-    if (!lightboxImageContainer || !currentImg || !nextImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
-      console.error('Erreur : Éléments du lightbox manquants', { lightboxImageContainer, currentImg, nextImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
+    if (!lightboxImageContainer || !lightboxImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
+      console.error('Erreur : Éléments du lightbox manquants', { lightboxImageContainer, lightboxImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
       return;
     }
 
@@ -542,43 +508,23 @@
       const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       const newAlt = visibleImages[currentIndex].querySelector('img').alt;
 
-      // Réinitialiser les positions et classes
-      currentImg.classList.remove('to-left', 'to-right');
-      nextImg.classList.remove('from-right', 'from-left');
-      nextImg.style.transform = direction === 'prev' ? 'translateX(-100%)' : 'translateX(100%)';
-
       if (direction === 'none') {
         // Pas d'animation pour la première ouverture
-        currentImg.src = newSrc;
-        currentImg.alt = newAlt;
-        nextImg.src = '';
-        nextImg.alt = '';
+        lightboxImageContainer.classList.remove('slide-left', 'slide-right');
+        lightboxImg.src = newSrc;
+        lightboxImg.alt = newAlt;
         isAnimating = false;
+        console.log('Lightbox affiché sans animation:', newAlt, 'Index:', currentIndex);
       } else {
-        // Charger l'image suivante
-        nextImg.src = newSrc;
-        nextImg.alt = newAlt;
-        // Appliquer les transitions
-        if (direction === 'next') {
-          currentImg.classList.add('to-left'); // Sort à gauche
-          nextImg.classList.add('from-right'); // Entre depuis la droite
-          console.log('Transition next: current → gauche, next → droite');
-        } else if (direction === 'prev') {
-          currentImg.classList.add('to-right'); // Sort à droite
-          nextImg.classList.add('from-left'); // Entre depuis la gauche
-          console.log('Transition prev: current → droite, next → gauche');
-        }
-        // Échanger les rôles après l'animation
+        // Animation selon la direction
+        lightboxImageContainer.classList.add(direction === 'next' ? 'slide-left' : 'slide-right');
         setTimeout(() => {
-          currentImg.src = nextImg.src;
-          currentImg.alt = nextImg.alt;
-          currentImg.classList.remove('to-left', 'to-right');
-          nextImg.classList.remove('from-right', 'from-left');
-          nextImg.src = '';
-          nextImg.alt = '';
-          nextImg.style.transform = 'translateX(100%)';
+          lightboxImageContainer.classList.remove('slide-left', 'slide-right');
+          lightboxImageContainer.style.transform = 'translateX(0)';
+          lightboxImg.src = newSrc;
+          lightboxImg.alt = newAlt;
           isAnimating = false;
-          console.log('Animation terminée, isAnimating:', isAnimating);
+          console.log('Transition terminée:', newAlt, 'Direction:', direction);
         }, 400);
       }
 
@@ -609,13 +555,10 @@
 
     function closeLightbox() {
       lightbox.classList.remove('active');
-      currentImg.src = '';
-      currentImg.alt = '';
-      nextImg.src = '';
-      nextImg.alt = '';
-      currentImg.classList.remove('to-left', 'to-right');
-      nextImg.classList.remove('from-right', 'from-left');
-      nextImg.style.transform = 'translateX(100%)';
+      lightboxImg.src = '';
+      lightboxImg.alt = '';
+      lightboxImageContainer.classList.remove('slide-left', 'slide-right');
+      lightboxImageContainer.style.transform = 'translateX(0)';
       thumbnailContainer.innerHTML = '';
       targetBody.style.overflow = '';
       isAnimating = false;
@@ -662,7 +605,6 @@
       closeLightbox();
     });
 
-    // MODIFICATION : Fermer l'overlay en cliquant sur lightbox-overlay ou lightbox-image-container
     lightbox.addEventListener('click', (e) => {
       const target = e.target;
       if (target === lightbox || target.closest('.lightbox-image-container')) {
