@@ -343,16 +343,17 @@
       .lightbox-close {
         position: absolute;
         top: 20px;
-        right: 20px;
+        right: 25px;
         background: rgba(255, 255, 255, 0.7) !important;
         border: none !important;
-        font-size: 1.5rem !important;
+        font-size: 28px !important;
         cursor: pointer !important;
-        padding: 5px 10px !important;
+        padding: 0px 7px 2px !important;
         border-radius: 50% !important;
         z-index: 1000000 !important;
         color: #222 !important;
         transition: background 0.2s !important;
+        line-height: 28px;
       }
       .lightbox-close:hover {
         background: #fff !important;
@@ -562,7 +563,7 @@
 
     function showLightbox(index, direction = 'none') {
       if (isAnimating || index < 0 || index >= getVisibleImages().length) {
-        console.warn('Animation en cours ou index hors limites:', index, isAnimating);
+        console.warn('Index hors limites ou animation en cours:', index, direction);
         isAnimating = false;
         return;
       }
@@ -573,28 +574,27 @@
       const newAlt = visibleImages[currentIndex]?.querySelector('img')?.alt;
 
       if (!newSrc || !newAlt) {
-        console.error('Erreur : Données manquantes pour l\'image à l\'index', index);
+        console.error('Erreur : données manquantes pour l’image à l’index', index);
         isAnimating = false;
         return;
       }
 
-      // Précharger les images adjacentes
+      // Précharger les images
       preloadAdjacentImages(currentIndex);
 
       // Réinitialiser les classes et styles
       currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
       nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
-      nextImg.style.transform = direction === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
+      nextImg.style.transform = direction === 'next' ? 'translateX(-100%)' : 'translateX(100%)';
       nextImg.style.opacity = '0';
       console.log('Initialisation transition:', {
         direction,
-        currentTransform: currentImg.style.transform,
         nextTransform: nextImg.style.transform,
         nextClasses: nextImg.className
       });
 
       if (direction === 'none') {
-        // Pas d'animation pour la première ouverture
+        // Pas de transition pour la première ouverture
         currentImg.src = newSrc;
         currentImg.alt = newAlt;
         currentImg.classList.add('current');
@@ -608,15 +608,15 @@
         nextImg.alt = newAlt;
         if (direction === 'next') {
           currentImg.classList.add('to-left'); // Actuelle sort à gauche
-          nextImg.classList.add('from-right'); // Suivante entre depuis la droite
-          console.log('Transition next: actuelle → gauche, prochaine → droite', {
+          nextImg.classList.add('from-left'); // Suivante entre depuis la gauche
+          console.log('Transition next: actuelle → gauche, prochaine → gauche', {
             currentClasses: currentImg.className,
             nextClasses: nextImg.className
           });
         } else if (direction === 'prev') {
           currentImg.classList.add('to-right'); // Actuelle sort à droite
-          nextImg.classList.add('from-left'); // Précédente entre depuis la gauche
-          console.log('Transition prev: actuelle → droite, précédente → gauche', {
+          nextImg.classList.add('from-right'); // Précédente entre depuis la droite
+          console.log('Transition prev: actuelle → droite, précédente → droite', {
             currentClasses: currentImg.className,
             nextClasses: nextImg.className
           });
@@ -641,7 +641,7 @@
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
-      console.log('Lightbox affiché:', newAlt, 'Index:', currentIndex, 'Direction:', direction);
+      console.log('Lightbox affiché:', newAlt, currentIndex, direction);
     }
 
     galleryItems.forEach((item, idx) => {
@@ -649,7 +649,7 @@
       if (img) {
         img.addEventListener('click', (e) => {
           e.stopPropagation();
-          console.log('Clic sur image:', img.alt, 'Index:', idx);
+          console.log('Clic sur image:', img.alt, idx);
           const visibleImages = getVisibleImages();
           const visibleIndex = visibleImages.indexOf(item);
           if (visibleIndex !== -1 && !isAnimating) {
@@ -659,7 +659,7 @@
           }
         });
       } else {
-        console.warn('Image manquante dans .gallery-item à l\'index:', idx);
+        console.warn('Image manquante dans .gallery-item à l’index:', idx);
       }
     });
 
@@ -683,20 +683,16 @@
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
       let idx = (currentIndex - 1 + visibleImages.length) % visibleImages.length;
-      if (visibleImages[idx]) {
-        console.log('Affichage image précédente:', idx);
-        showLightbox(idx, 'prev');
-      }
+      console.log('Affichage image précédente:', idx);
+      showLightbox(idx, 'prev');
     }
 
     function showNext() {
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
       let idx = (currentIndex + 1) % visibleImages.length;
-      if (visibleImages[idx]) {
-        console.log('Affichage image suivante:', idx);
-        showLightbox(idx, 'next');
-      }
+      console.log('Affichage image suivante:', idx);
+      showLightbox(idx, 'next');
     }
 
     prevBtn.addEventListener('click', (e) => {
@@ -729,28 +725,28 @@
     targetDocument.addEventListener('keydown', (e) => {
       if (!lightbox.classList.contains('active') || isAnimating) return;
       if (e.key === 'Escape') {
-        console.log('Touche Échap pressée');
+        console.log('Touche Échap');
         closeLightbox();
       }
       if (e.key === 'ArrowLeft') {
-        console.log('Touche flèche gauche pressée');
+        console.log('Clavier : flèche gauche');
         showPrev();
       }
       if (e.key === 'ArrowRight') {
-        console.log('Touche flèche droite pressée');
+        console.log('Clavier : flèche droite');
         showNext();
       }
     });
 
-    // Ajuster la hauteur de l'iframe
+    // Ajuster la hauteur de l’iframe
     if (isInIframe) {
       const updateHeight = () => {
         const height = galleryContainer.offsetHeight;
         try {
           window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
-          console.log('Hauteur iframe mise à jour:', height);
+          console.log('Hauteur iframe:', height);
         } catch (e) {
-          console.error('Erreur lors de l\'envoi de la hauteur iframe:', e);
+          console.error('Erreur hauteur iframe:', e);
         }
       };
       new ResizeObserver(updateHeight).observe(galleryContainer);
