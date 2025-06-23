@@ -114,7 +114,7 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.4s ease, opacity 0.4s ease !important;
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
         will-change: transform, opacity;
         transform: translateX(0);
         opacity: 1;
@@ -289,7 +289,7 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.4s ease, opacity 0.4s ease !important;
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
         will-change: transform, opacity;
         transform: translateX(0);
         opacity: 1;
@@ -445,7 +445,7 @@
     // Charger MixItUp
     const script = localDocument.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
-    script.onload = () => {
+    script.onload = function() {
       console.log('MixItUp chargé');
       const mixer = mixitup('.gallery-grid', {
         selectors: {
@@ -515,7 +515,7 @@
       return;
     }
 
-    // Précharger les images adjacentes
+    // Précharger l'image suivante et précédente
     function preloadAdjacentImages(index) {
       const visibleImages = getVisibleImages();
       const prevIndex = (index - 1 + visibleImages.length) % visibleImages.length;
@@ -534,7 +534,7 @@
     function getVisibleImages() {
       const visibleImages = Array.from(galleryItems).filter(item => {
         const style = window.getComputedStyle(item);
-        return style.display !== 'none';
+        return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
       });
       console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').alt));
       return visibleImages;
@@ -545,7 +545,7 @@
       thumbnailContainer.innerHTML = visibleImages.map((item, idx) => `
         <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
              src="${item.querySelector('img').src}" 
-             alt="${item.querySelector('img').alt}"
+             alt="${item.querySelector('img').alt}" 
              data-index="${idx}">
       `).join('');
       thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
@@ -562,7 +562,7 @@
 
     function showLightbox(index, direction = 'none') {
       if (isAnimating || index < 0 || index >= getVisibleImages().length) {
-        console.warn('Animation en cours ou index invalide:', index, isAnimating);
+        console.warn('Animation en cours ou index hors limites:', index, isAnimating);
         isAnimating = false;
         return;
       }
@@ -573,7 +573,7 @@
       const newAlt = visibleImages[currentIndex]?.querySelector('img')?.alt;
 
       if (!newSrc || !newAlt) {
-        console.error('Erreur : données manquantes pour l’image à l’index', index);
+        console.error('Erreur : Données manquantes pour l\'image à l\'index', index);
         isAnimating = false;
         return;
       }
@@ -603,11 +603,11 @@
         if (direction === 'next') {
           currentImg.classList.add('to-left'); // Actuelle sort à gauche
           nextImg.classList.add('from-right'); // Suivante entre depuis la droite
-          console.log('Transition next: current → gauche, prochaine → droite');
+          console.log('Transition next: actuelle → gauche, prochaine → droite');
         } else if (direction === 'prev') {
           currentImg.classList.add('to-right'); // Actuelle sort à droite
           nextImg.classList.add('from-left'); // Précédente entre depuis la gauche
-          console.log('Transition prev: actuelle → droite, prochaine → gauche');
+          console.log('Transition prev: actuelle → droite, précédente → gauche');
         }
         setTimeout(() => {
           currentImg.src = newSrc;
@@ -626,6 +626,7 @@
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
+      console.log('Lightbox affiché:', newAlt, 'Index:', currentIndex, 'Direction:', direction);
     }
 
     galleryItems.forEach((item, idx) => {
@@ -643,7 +644,7 @@
           }
         });
       } else {
-        console.warn('Image manquante dans .gallery-item à l’indice:', idx);
+        console.warn('Image manquante dans .gallery-item à l\'index:', idx);
       }
     });
 
@@ -667,16 +668,20 @@
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
       let idx = (currentIndex - 1 + visibleImages.length) % visibleImages.length;
-      console.log('Affichage image précédente:', idx);
-      showLightbox(idx, 'prev');
+      if (visibleImages[idx]) {
+        console.log('Affichage image précédente:', idx);
+        showLightbox(idx, 'prev');
+      }
     }
 
     function showNext() {
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
       let idx = (currentIndex + 1) % visibleImages.length;
-      console.log('Affichage image suivante:', idx);
-      showLightbox(idx, 'next');
+      if (visibleImages[idx]) {
+        console.log('Affichage image suivante:', idx);
+        showLightbox(idx, 'next');
+      }
     }
 
     prevBtn.addEventListener('click', (e) => {
@@ -699,15 +704,15 @@
 
     lightbox.addEventListener('click', (e) => {
       const target = e.target;
-      if (target === lightbox || target.closest('.light-box-image-container')) {
-        console.log('Clic sur l’overlay ou image-container pour fermer');
+      if (target === lightbox || target.closest('.lightbox-image-container')) {
+        console.log('Clic sur overlay ou image-container pour fermer');
         closeLightbox();
       }
     });
 
-    // Navigation au clavier
+    // Navigation clavier
     targetDocument.addEventListener('keydown', (e) => {
-      if (!light-box.classList.contains('active') || isAnimating) return;
+      if (!lightbox.classList.contains('active') || isAnimating) return;
       if (e.key === 'Escape') {
         console.log('Touche Échap pressée');
         closeLightbox();
@@ -722,19 +727,19 @@
       }
     });
 
-    // Ajuster la hauteur de l’iframe
+    // Ajuster la hauteur de l'iframe
     if (isInIframe) {
       const updateHeight = () => {
         const height = galleryContainer.offsetHeight;
         try {
           window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
+          console.log('Hauteur iframe mise à jour:', height);
         } catch (e) {
-          console.error('Erreur lors de l’envoi de la hauteur dans le code :', e);
+          console.error('Erreur lors de l\'envoi de la hauteur iframe:', e);
         }
       };
       new ResizeObserver(updateHeight).observe(galleryContainer);
       updateHeight();
     }
+  });
 })();
-})();
-</script>
