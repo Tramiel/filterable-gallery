@@ -578,7 +578,7 @@
       // Réinitialiser les classes
       currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
       nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
-      nextImg.style.transform = direction === 'prev' ? 'translateX(-100%)' : 'translateX(100%)';
+      nextImg.style.transform = direction === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
       nextImg.style.opacity = '0';
 
       if (direction === 'none') {
@@ -595,12 +595,12 @@
         nextImg.src = newSrc;
         nextImg.alt = newAlt;
         if (direction === 'next') {
-          currentImg.classList.add('to-left');
-          nextImg.classList.add('from-right');
+          currentImg.classList.add('to-left'); // Actuelle sort à gauche
+          nextImg.classList.add('from-right'); // Suivante entre depuis la droite
           console.log('Transition next: current → gauche, next → droite');
         } else if (direction === 'prev') {
-          currentImg.classList.add('to-right');
-          nextImg.classList.add('from-left');
+          currentImg.classList.add('to-right'); // Actuelle sort à droite
+          nextImg.classList.add('from-left'); // Précédente entre depuis la gauche
           console.log('Transition prev: current → droite, next → gauche');
         }
         setTimeout(() => {
