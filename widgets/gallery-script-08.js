@@ -81,32 +81,6 @@
       .filter-button[aria-selected="true"] {
         font-weight: bold !important;
       }
-      @media (max-width: 768px) {
-        .gallery-grid {
-          grid-template-columns: repeat(auto-fill, 150px) !important;
-        }
-        .gallery-item {
-          width: 150px !important;
-          height: 150px !important;
-          border-radius: 8px !important;
-        }
-        .filter-button {
-          padding: 8px 15px !important;
-          font-size: 14px !important;
-        }
-        .gallery-item img {
-          width: 100% !important;
-          height: 100% !important;
-          object-fit: cover !important;
-          border-radius: 8px !important;
-        }
-      }
-    `;
-    localDocument.head.appendChild(style);
-
-    // Injecter les styles du lightbox dans le DOM parent
-    const parentStyle = targetDocument.createElement('style');
-    parentStyle.textContent = `
       .lightbox-overlay {
         display: none;
         position: fixed !important;
@@ -214,6 +188,24 @@
         opacity: 1 !important;
       }
       @media (max-width: 768px) {
+        .gallery-grid {
+          grid-template-columns: repeat(auto-fill, 150px) !important;
+        }
+        .gallery-item {
+          width: 150px !important;
+          height: 150px !important;
+          border-radius: 8px !important;
+        }
+        .filter-button {
+          padding: 8px 15px !important;
+          font-size: 14px !important;
+        }
+        .gallery-item img {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+          border-radius: 8px !important;
+        }
         .lightbox-image-container {
           max-width: 98vw !important;
           max-height: 60vh !important;
@@ -234,7 +226,119 @@
         }
       }
     `;
+    localDocument.head.appendChild(style);
+
+    // Supprimer les styles en double dans le DOM parent
     try {
+      const parentStyle = targetDocument.createElement('style');
+      parentStyle.textContent = `
+        .lightbox-overlay {
+          display: none;
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          background: rgba(0, 0, 0, 0.85) !important;
+          justify-content: center;
+          align-items: center;
+          z-index: 999999 !important;
+          flex-direction: column;
+        }
+        .lightbox-overlay.active {
+          display: flex !important;
+        }
+        .lightbox-image-container {
+          position: relative;
+          max-width: 90vw !important;
+          max-height: 70vh !important;
+          overflow: hidden;
+        }
+        .lightbox-img {
+          max-width: 90vw !important;
+          max-height: 70vh !important;
+          object-fit: contain !important;
+          border-radius: 8px !important;
+          box-shadow: 0 0 30px #111 !important;
+          display: block !important;
+          margin: 0 auto !important;
+          position: absolute;
+          top: 0;
+          left: 0;
+          opacity: 0;
+          transition: opacity 0.4s ease !important;
+        }
+        .lightbox-img.active {
+          opacity: 1;
+        }
+        .lightbox-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.7) !important;
+          border: none !important;
+          font-size: 2rem !important;
+          cursor: pointer !important;
+          padding: 8px 18px !important;
+          border-radius: 50% !important;
+          z-index: 1000000 !important;
+          color: #222 !important;
+          transition: background 0.2s !important;
+        }
+        .lightbox-arrow:hover {
+          background: #fff !important;
+        }
+        .lightbox-arrow.prev {
+          left: 2vw !important;
+        }
+        .lightbox-arrow.next {
+          right: 2vw !important;
+        }
+        .lightbox-close {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: rgba(255, 255, 255, 0.7) !important;
+          border: none !important;
+          font-size: 1.5rem !important;
+          cursor: pointer !important;
+          padding: 5px 10px !important;
+          border-radius: 50% !important;
+          z-index: 1000000 !important;
+          color: #222 !important;
+          transition: background 0.2s !important;
+        }
+        .lightbox-close:hover {
+          background: #fff !important;
+        }
+        .thumbnail-container {
+          display: flex !important;
+          justify-content: center !important;
+          gap: 10px !important;
+          margin-top: 10px !important;
+          overflow-x: auto !important;
+          max-width: 90vw !important;
+          padding: 10px 0 !important;
+        }
+        .thumbnail {
+          width: 60px !important;
+          height: 60px !important;
+          object-fit: cover !important;
+          border-radius: 4px !important;
+          cursor: pointer !important;
+          opacity: 0.6 !important;
+          transition: opacity 0.3s !important;
+        }
+        .thumbnail.active {
+          opacity: 1 !important;
+          border: 2px solid #007bff !important;
+        }
+        .thumbnail:hover {
+          opacity: 1 !important;
+        }
+      `;
       targetDocument.head.appendChild(parentStyle);
       console.log('Styles du lightbox injectés dans le DOM parent');
     } catch (e) {
@@ -251,19 +355,19 @@
       <div class="gallery-grid">
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=800" 
+               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224" 
                alt="Coiffure élégante pour mariage" 
                title="Coiffure élégante pour mariage">
         </div>
         <div class="gallery-item mix soiree">
           <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800" 
+               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224" 
                alt="Coiffure glamour pour soirée" 
                title="Coiffure glamour pour soirée">
         </div>
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800" 
+               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224" 
                alt="Coiffure romantique pour mariage" 
                title="Coiffure romantique pour mariage">
         </div>
@@ -331,261 +435,224 @@
     localDocument.head.appendChild(script);
 
     // Créer le lightbox dans le DOM parent
-    function initializeLightbox() {
-      let lightbox = targetDocument.querySelector('.lightbox-overlay');
-      if (!lightbox) {
-        try {
-          lightbox = targetDocument.createElement('div');
-          lightbox.className = 'lightbox-overlay';
-          lightbox.id = 'global-lightbox';
-          lightbox.innerHTML = `
-            <button class="lightbox-close" title="Fermer">×</button>
-            <button class="lightbox-arrow prev" title="Précédente">←</button>
-            <div class="lightbox-image-container">
-              <img class="lightbox-img active" src="" alt="">
-              <img class="lightbox-img" src="" alt="">
-            </div>
-            <button class="lightbox-arrow next" title="Suivante">→</button>
-            <div class="thumbnail-container"></div>
+    let lightbox = targetDocument.querySelector('.lightbox-overlay');
+    if (!lightbox) {
+      try {
+        lightbox = targetDocument.createElement('div');
+        lightbox.className = 'lightbox-overlay';
+        lightbox.id = 'global-lightbox';
+        lightbox.innerHTML = `
+          <button class="lightbox-close" title="Fermer">×</button>
+          <button class="lightbox-arrow prev" title="Précédente">←</button>
+          <div class="lightbox-image-container">
+            <img class="lightbox-img active" src="" alt="">
+            <img class="lightbox-img" src="" alt="">
+          </div>
+          <button class="lightbox-arrow next" title="Suivante">→</button>
+          <div class="thumbnail-container"></div>
+        `;
+        targetBody.appendChild(lightbox);
+        console.log('Lightbox créé dans le DOM parent');
+      } catch (e) {
+        console.error('Erreur lors de la création du lightbox:', e);
+        return;
+      }
+    }
+
+    // Initialisation du lightbox
+    const imageContainer = lightbox.querySelector('.lightbox-image-container');
+    const lightboxImgs = lightbox.querySelectorAll('.lightbox-img');
+    const currentImg = lightboxImgs[0];
+    const nextImg = lightboxImgs[1];
+    const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
+    const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
+    const closeBtn = lightbox.querySelector('.lightbox-close');
+    const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
+
+    if (!imageContainer || !currentImg || !nextImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
+      console.error('Erreur : Éléments du lightbox manquants', { imageContainer, currentImg, nextImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
+      return;
+    }
+
+    let currentIndex = 0;
+    let isAnimating = false;
+    let visibleImages = [];
+
+    function updateVisibleImages() {
+      visibleImages = Array.from(galleryItems).filter(item => {
+        const style = window.getComputedStyle(item);
+        return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
+      });
+      console.log('Images visibles:', visibleImages.map(item => {
+        const img = item.querySelector('img');
+        return img ? img.alt : 'Image manquante';
+      }));
+    }
+
+    function updateThumbnails() {
+      thumbnailContainer.innerHTML = visibleImages.map((item, idx) => {
+        const img = item.querySelector('img');
+        if (img) {
+          return `
+            <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
+                 src="${img.src}" 
+                 alt="${img.alt}" 
+                 data-index="${idx}">
           `;
-          targetBody.appendChild(lightbox);
-          console.log('Lightbox créé dans le DOM parent');
-        } catch (e) {
-          console.error('Erreur lors de la création du lightbox:', e);
-          throw new Error('Échec de la création du lightbox');
         }
-      }
-
-      // Initialisation du lightbox
-      const imageContainer = lightbox.querySelector('.lightbox-image-container');
-      const lightboxImgs = lightbox.querySelectorAll('.lightbox-img');
-      const currentImg = lightboxImgs[0];
-      const nextImg = lightboxImgs[1];
-      const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
-      const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
-      const closeBtn = lightbox.querySelector('.lightbox-close');
-      const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
-
-      if (!imageContainer || !currentImg || !nextImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
-        console.error('Erreur : Éléments du lightbox manquants', { imageContainer, currentImg, nextImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
-        throw new Error('Éléments du lightbox manquants');
-      }
-
-      let currentIndex = 0;
-      let isAnimating = false;
-      let visibleImages = [];
-
-      function updateVisibleImages() {
-        visibleImages = Array.from(galleryItems).filter(item => {
-          const style = window.getComputedStyle(item);
-          return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
-        });
-        console.log('Images visibles:', visibleImages.map(item => {
-          const img = item.querySelector('img');
-          return img ? img.alt : 'Image manquante';
-        }));
-      }
-
-      function updateThumbnails() {
-        if (!thumbnailContainer) return;
-        thumbnailContainer.innerHTML = visibleImages.map((item, idx) => {
-          const img = item.querySelector('img');
-          if (img) {
-            return `
-              <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
-                   src="${img.src}" 
-                   alt="${img.alt}" 
-                   data-index="${idx}">
-            `;
+        return '';
+      }).join('');
+      thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          if (!isAnimating) {
+            const newIndex = parseInt(thumb.getAttribute('data-index'));
+            console.log('Clic sur vignette:', thumb.alt, 'Index:', newIndex);
+            showLightbox(newIndex, newIndex > currentIndex ? 'right' : 'left');
           }
-          return '';
-        }).join('');
-        thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
-          thumb.addEventListener('click', () => {
-            if (!isAnimating) {
-              const newIndex = parseInt(thumb.getAttribute('data-index'));
-              console.log('Clic sur vignette:', thumb.alt, 'Index:', newIndex);
-              showLightbox(newIndex, newIndex > currentIndex ? 'right' : 'left');
-            }
-          });
         });
+      });
+    }
+
+    function showLightbox(index, direction = 'none') {
+      if (isAnimating || index < 0 || index >= visibleImages.length) {
+        console.warn('Animation en cours ou index hors limites:', index, isAnimating);
+        isAnimating = false;
+        return;
+      }
+      isAnimating = true;
+      currentIndex = index;
+      const currentGalleryImg = visibleImages[currentIndex].querySelector('img');
+      if (!currentGalleryImg) {
+        console.error('Image manquante pour l\'index:', currentIndex);
+        isAnimating = false;
+        return;
       }
 
-      function showLightbox(index, direction = 'none') {
-        if (isAnimating || index < 0 || index >= visibleImages.length) {
-          console.warn('Animation en cours ou index hors limites:', index, isAnimating);
-          isAnimating = false;
-          return;
-        }
-        isAnimating = true;
-        currentIndex = index;
-        const currentGalleryImg = visibleImages[currentIndex].querySelector('img');
-        if (!currentGalleryImg) {
-          console.error('Image manquante pour l\'index:', currentIndex);
-          isAnimating = false;
-          return;
-        }
-
-        if (direction === 'none') {
-          // Affichage immédiat pour la première image
-          currentImg.src = currentGalleryImg.getAttribute('data-full');
-          currentImg.alt = currentGalleryImg.alt;
+      if (direction === 'none') {
+        // Affichage immédiat pour la première image
+        currentImg.src = currentGalleryImg.getAttribute('data-full');
+        currentImg.alt = currentGalleryImg.alt;
+        currentImg.classList.add('active');
+        nextImg.classList.remove('active');
+        isAnimating = false;
+      } else {
+        // Transition fluide avec fondu croisé
+        nextImg.src = currentGalleryImg.getAttribute('data-full');
+        nextImg.alt = currentGalleryImg.alt;
+        nextImg.classList.add('active');
+        setTimeout(() => {
+          currentImg.src = nextImg.src;
+          currentImg.alt = nextImg.alt;
           currentImg.classList.add('active');
           nextImg.classList.remove('active');
           isAnimating = false;
-        } else {
-          // Transition fluide avec fondu croisé
-          const nextGalleryImg = visibleImages[index].querySelector('img');
-          if (!nextGalleryImg) {
-            console.error('Image suivante manquante pour l\'index:', index);
-            isAnimating = false;
-            return;
+          console.log('Animation terminée, isAnimating:', isAnimating);
+        }, 400);
+      }
+
+      lightbox.classList.add('active');
+      updateThumbnails();
+      targetBody.style.overflow = 'hidden';
+      console.log('Lightbox affiché:', currentImg.alt, 'Index:', currentIndex);
+    }
+
+    galleryItems.forEach((item, idx) => {
+      const img = item.querySelector('img');
+      if (img) {
+        img.addEventListener('click', (e) => {
+          e.stopPropagation();
+          console.log('Clic sur image:', img.alt, 'Index:', idx);
+          updateVisibleImages();
+          const visibleIndex = visibleImages.indexOf(item);
+          if (visibleIndex !== -1 && !isAnimating) {
+            showLightbox(visibleIndex);
+          } else {
+            console.warn('Image non visible ou animation en cours:', visibleIndex, isAnimating);
           }
-          nextImg.src = nextGalleryImg.getAttribute('data-full');
-          nextImg.alt = nextGalleryImg.alt;
-          nextImg.classList.add('active');
-          setTimeout(() => {
-            currentImg.src = nextImg.src;
-            currentImg.alt = nextImg.alt;
-            currentImg.classList.add('active');
-            nextImg.classList.remove('active');
-            isAnimating = false;
-            console.log('Animation terminée, isAnimating:', isAnimating);
-          }, 400);
-        }
-
-        lightbox.classList.add('active');
-        updateThumbnails();
-        targetBody.style.overflow = 'hidden';
-        console.log('Lightbox affiché:', currentImg.alt, 'Index:', currentIndex);
+        });
+      } else {
+        console.warn('Image manquante dans .gallery-item à l\'index:', idx);
       }
+    });
 
-      // Attacher les gestionnaires d'événements
-      galleryItems.forEach((item, idx) => {
-        const img = item.querySelector('img');
-        if (img) {
-          img.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('Clic sur image:', img.alt, 'Index:', idx);
-            updateVisibleImages();
-            const visibleIndex = visibleImages.indexOf(item);
-            if (visibleIndex !== -1 && !isAnimating) {
-              showLightbox(visibleIndex);
-            } else {
-              console.warn('Image non visible ou animation en cours:', visibleIndex, isAnimating);
-            }
-          });
-        } else {
-          console.warn('Image manquante dans .gallery-item à l\'index:', idx);
-        }
-      });
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      currentImg.src = '';
+      currentImg.alt = '';
+      nextImg.src = '';
+      nextImg.alt = '';
+      currentImg.classList.remove('active');
+      nextImg.classList.remove('active');
+      thumbnailContainer.innerHTML = '';
+      targetBody.style.overflow = '';
+      isAnimating = false;
+      console.log('Lightbox fermé');
+    }
 
-      function closeLightbox() {
-        if (!lightbox) {
-          console.error('Erreur : lightbox est null');
-          return;
-        }
-        lightbox.classList.remove('active');
-        currentImg.src = '';
-        currentImg.alt = '';
-        nextImg.src = '';
-        nextImg.alt = '';
-        currentImg.classList.remove('active');
-        nextImg.classList.remove('active');
-        thumbnailContainer.innerHTML = '';
-        targetBody.style.overflow = '';
-        isAnimating = false;
-        console.log('Lightbox fermé');
-      }
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('Clic sur flèche précédente');
+      showPrev();
+    });
 
-      prevBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        console.log('Clic sur flèche précédente');
-        showPrev();
-      });
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('Clic sur flèche suivante');
+      showNext();
+    });
 
-      nextBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        console.log('Clic sur flèche suivante');
-        showNext();
-      });
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('Clic sur bouton fermer');
+      closeLightbox();
+    });
 
-      closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        console.log('Clic sur bouton fermer');
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        console.log('Clic sur l\'overlay pour fermer');
         closeLightbox();
-      });
-
-      lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) {
-          console.log('Clic sur l\'overlay pour fermer');
-          closeLightbox();
-        }
-      });
-
-      // Navigation clavier
-      targetDocument.addEventListener('keydown', (e) => {
-        if (!lightbox.classList.contains('active') || isAnimating) return;
-        if (e.key === 'Escape') {
-          console.log('Touche Échap pressée');
-          closeLightbox();
-        }
-        if (e.key === 'ArrowLeft') {
-          console.log('Touche flèche gauche pressée');
-          showPrev();
-        }
-        if (e.key === 'ArrowRight') {
-          console.log('Touche flèche droite pressée');
-          showNext();
-        }
-      });
-
-      function showPrev() {
-        if (isAnimating) return;
-        updateVisibleImages();
-        let idx = currentIndex - 1;
-        if (idx < 0) idx = visibleImages.length - 1;
-        if (visibleImages[idx]) {
-          showLightbox(idx, 'left');
-        }
       }
+    });
 
-      function showNext() {
-        if (isAnimating) return;
-        updateVisibleImages();
-        let idx = currentIndex + 1;
-        if (idx >= visibleImages.length) idx = 0;
-        if (visibleImages[idx]) {
-          showLightbox(idx, 'right');
-        }
+    // Navigation clavier
+    targetDocument.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('active') || isAnimating) return;
+      if (e.key === 'Escape') {
+        console.log('Touche Échap pressée');
+        closeLightbox();
       }
+      if (e.key === 'ArrowLeft') {
+        console.log('Touche flèche gauche pressée');
+        showPrev();
+      }
+      if (e.key === 'ArrowRight') {
+        console.log('Touche flèche droite pressée');
+        showNext();
+      }
+    });
 
-      // Initialiser les images visibles
+    function showPrev() {
+      if (isAnimating) return;
       updateVisibleImages();
-    }
-
-    // Tenter d'initialiser le lightbox avec retry
-    let retryCount = 0;
-    const maxRetries = 10;
-    const retryDelay = 200;
-
-    function tryInitializeLightbox() {
-      try {
-        initializeLightbox();
-        console.log('Lightbox initialisé avec succès');
-      } catch (e) {
-        console.error('Échec de l\'initialisation du lightbox:', e);
-        if (retryCount < maxRetries) {
-          retryCount++;
-          console.log(`Nouvelle tentative ${retryCount}/${maxRetries} dans ${retryDelay}ms`);
-          setTimeout(tryInitializeLightbox, retryDelay);
-        } else {
-          console.error('Échec définitif de l\'initialisation du lightbox après', maxRetries, 'tentatives');
-        }
+      let idx = currentIndex - 1;
+      if (idx < 0) idx = visibleImages.length - 1;
+      if (visibleImages[idx]) {
+        showLightbox(idx, 'left');
       }
     }
 
-    tryInitializeLightbox();
+    function showNext() {
+      if (isAnimating) return;
+      updateVisibleImages();
+      let idx = currentIndex + 1;
+      if (idx >= visibleImages.length) idx = 0;
+      if (visibleImages[idx]) {
+        showLightbox(idx, 'right');
+      }
+    }
+
+    // Initialiser les images visibles
+    updateVisibleImages();
 
     // Ajuster la hauteur de l'iframe
     if (isInIframe) {
