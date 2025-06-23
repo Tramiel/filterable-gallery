@@ -581,11 +581,17 @@
       // Précharger les images adjacentes
       preloadAdjacentImages(currentIndex);
 
-      // Réinitialiser les classes
+      // Réinitialiser les classes et styles
       currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
       nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
       nextImg.style.transform = direction === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
       nextImg.style.opacity = '0';
+      console.log('Initialisation transition:', {
+        direction,
+        currentTransform: currentImg.style.transform,
+        nextTransform: nextImg.style.transform,
+        nextClasses: nextImg.className
+      });
 
       if (direction === 'none') {
         // Pas d'animation pour la première ouverture
@@ -603,11 +609,17 @@
         if (direction === 'next') {
           currentImg.classList.add('to-left'); // Actuelle sort à gauche
           nextImg.classList.add('from-right'); // Suivante entre depuis la droite
-          console.log('Transition next: actuelle → gauche, prochaine → droite');
+          console.log('Transition next: actuelle → gauche, prochaine → droite', {
+            currentClasses: currentImg.className,
+            nextClasses: nextImg.className
+          });
         } else if (direction === 'prev') {
           currentImg.classList.add('to-right'); // Actuelle sort à droite
           nextImg.classList.add('from-left'); // Précédente entre depuis la gauche
-          console.log('Transition prev: actuelle → droite, précédente → gauche');
+          console.log('Transition prev: actuelle → droite, précédente → gauche', {
+            currentClasses: currentImg.className,
+            nextClasses: nextImg.className
+          });
         }
         setTimeout(() => {
           currentImg.src = newSrc;
@@ -619,7 +631,10 @@
           nextImg.style.transform = 'translateX(100%)';
           nextImg.style.opacity = '0';
           isAnimating = false;
-          console.log('Transition terminée:', newAlt, 'Direction:', direction);
+          console.log('Transition terminée:', newAlt, 'Direction:', direction, {
+            finalCurrentClasses: currentImg.className,
+            finalNextClasses: nextImg.className
+          });
         }, 300);
       }
 
