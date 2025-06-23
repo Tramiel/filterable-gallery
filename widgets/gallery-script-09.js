@@ -1,9 +1,9 @@
 (function() {
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener', 'DOMContentLoaded', function() {
     // Trouver le conteneur
     const galleryContainer = document.querySelector('.custom-gallery');
     if (!galleryContainer) {
-      console.warn('Conteneur .custom-gallery non trouvé.');
+      console.error('Conteneur .custom-gallery non trouvé.');
       return;
     }
 
@@ -24,8 +24,8 @@
       }
       .filter-buttons {
         text-align: center;
-        margin: 20px 0 !important;
-        padding: 10px 0 !important;
+        margin: 20px !important;
+        padding: 10px !important;
       }
       .filter-button {
         padding: 8px 20px !important;
@@ -35,7 +35,7 @@
         cursor: pointer !important;
         border-radius: 4px !important;
         font-size: 16px !important;
-        transition: background 0.3s, color 0.3s, transform 0.1s !important;
+        transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease !important;
       }
       .filter-button:hover {
         background: #e0e0e0 !important;
@@ -100,9 +100,11 @@
         width: 90vw !important;
         height: 70vh !important;
         overflow: hidden !important;
-        transition: transform 0.4s ease !important; /* AJOUT : Transition sur le conteneur */
       }
       .lightbox-img {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100% !important;
         height: 100% !important;
         max-width: 90vw !important;
@@ -112,12 +114,33 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
+        transition: transform 0.4s ease, opacity 0.4s ease !important; /* AJOUT : Transition opacity */
+        will-change: transform, opacity; /* AJOUT : Optimisation performance */
+        transform: translateX(0);
+        opacity: 1;
       }
-      .lightbox-image-container.slide-left {
-        transform: translateX(-100%); /* AJOUT : Défilement vers la gauche */
+      .lightbox-img.current {
+        z-index: 1;
       }
-      .lightbox-image-container.slide-right {
-        transform: translateX(100%); /* AJOUT : Défilement vers la droite */
+      .lightbox-img.next {
+        transform: translateX(100%); /* Position initiale à droite */
+        opacity: 0; /* AJOUT : Masquer initialement */
+      }
+      .lightbox-img.to-left {
+        transform: translateX(-100%); /* Sort à gauche */
+        opacity: 0; /* AJOUT : Masquer pendant la sortie */
+      }
+      .lightbox-img.from-right {
+        transform: translateX(0); /* Entre depuis la droite */
+        opacity: 1; /* AJOUT : Visible à l'arrivée */
+      }
+      .lightbox-img.to-right {
+        transform: translateX(100%); /* Sort à droite */
+        opacity: 0; /* AJOUT : Masquer pendant la sortie */
+      }
+      .lightbox-img.from-left {
+        transform: translateX(0); /* Entre depuis la gauche */
+        opacity: 1; /* AJOUT : Visible à l'arrivée */
       }
       .lightbox-arrow {
         position: absolute;
@@ -252,9 +275,11 @@
         width: 90vw !important;
         height: 70vh !important;
         overflow: hidden !important;
-        transition: transform 0.4s ease !important;
       }
       .lightbox-img {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100% !important;
         height: 100% !important;
         max-width: 90vw !important;
@@ -264,12 +289,33 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
+        transition: transform 0.4s ease, opacity 0.4s ease !important;
+        will-change: transform, opacity;
+        transform: translateX(0);
+        opacity: 1;
       }
-      .lightbox-image-container.slide-left {
-        transform: translateX(-100%);
+      .lightbox-img.current {
+        z-index: 1;
       }
-      .lightbox-image-container.slide-right {
+      .lightbox-img.next {
         transform: translateX(100%);
+        opacity: 0;
+      }
+      .lightbox-img.to-left {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      .lightbox-img.from-right {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      .lightbox-img.to-right {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      .lightbox-img.from-left {
+        transform: translateX(0);
+        opacity: 1;
       }
       .lightbox-arrow {
         position: absolute;
@@ -356,19 +402,19 @@
       <div class="gallery-grid">
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224"
+               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=800" 
                alt="Coiffure élégante pour mariage" 
                title="Coiffure élégante pour mariage">
         </div>
         <div class="gallery-item mix soiree">
           <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224"
+               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800" 
                alt="Coiffure glamour pour soirée" 
                title="Coiffure glamour pour soirée">
         </div>
         <div class="gallery-item mix mariage">
           <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224"
+               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800" 
                alt="Coiffure romantique pour mariage" 
                title="Coiffure romantique pour mariage">
         </div>
@@ -439,7 +485,8 @@
           <button class="lightbox-close" title="Fermer">×</button>
           <button class="lightbox-arrow prev" title="Précédente">←</button>
           <div class="lightbox-image-container">
-            <img class="lightbox-img" src="" alt="">
+            <img class="lightbox-img current" src="" alt="">
+            <img class="lightbox-img next" src="" alt="">
           </div>
           <button class="lightbox-arrow next" title="Suivante">→</button>
           <div class="thumbnail-container"></div>
@@ -454,7 +501,8 @@
 
     // Initialisation du lightbox
     const lightboxImageContainer = lightbox.querySelector('.lightbox-image-container');
-    const lightboxImg = lightbox.querySelector('.lightbox-img');
+    const currentImg = lightbox.querySelector('.lightbox-img.current');
+    const nextImg = lightbox.querySelector('.lightbox-img.next');
     const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
     const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
     const closeBtn = lightbox.querySelector('.lightbox-close');
@@ -462,9 +510,25 @@
     let currentIndex = 0;
     let isAnimating = false;
 
-    if (!lightboxImageContainer || !lightboxImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
-      console.error('Erreur : Éléments du lightbox manquants', { lightboxImageContainer, lightboxImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
+    if (!lightboxImageContainer || !currentImg || !nextImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
+      console.error('Erreur : Éléments du lightbox manquants', { lightboxImageContainer, currentImg, nextImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
       return;
+    }
+
+    // Précharger l'image suivante et précédente
+    function preloadAdjacentImages(index) {
+      const visibleImages = getVisibleImages();
+      const prevIndex = index > 0 ? index - 1 : visibleImages.length - 1;
+      const nextIndex = index < visibleImages.length - 1 ? index + 1 : 0;
+      const urls = [
+        visibleImages[prevIndex].querySelector('img').getAttribute('data-full'),
+        visibleImages[nextIndex].querySelector('img').getAttribute('data-full')
+      ];
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+        console.log('Préchargement adjacent:', url);
+      });
     }
 
     function getVisibleImages() {
@@ -508,21 +572,46 @@
       const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       const newAlt = visibleImages[currentIndex].querySelector('img').alt;
 
+      // Précharger les images adjacentes
+      preloadAdjacentImages(currentIndex);
+
+      // Réinitialiser les classes
+      currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
+      nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
+      nextImg.style.transform = direction === 'prev' ? 'translateX(-100%)' : 'translateX(100%)';
+      nextImg.style.opacity = '0';
+
       if (direction === 'none') {
         // Pas d'animation pour la première ouverture
-        lightboxImageContainer.classList.remove('slide-left', 'slide-right');
-        lightboxImg.src = newSrc;
-        lightboxImg.alt = newAlt;
+        currentImg.src = newSrc;
+        currentImg.alt = newAlt;
+        currentImg.classList.add('current');
+        nextImg.src = '';
+        nextImg.alt = '';
         isAnimating = false;
         console.log('Lightbox affiché sans animation:', newAlt, 'Index:', currentIndex);
       } else {
-        // Animation selon la direction
-        lightboxImageContainer.classList.add(direction === 'next' ? 'slide-left' : 'slide-right');
+        // Charger l'image suivante
+        nextImg.src = newSrc;
+        nextImg.alt = newAlt;
+        if (direction === 'next') {
+          currentImg.classList.add('to-left');
+          nextImg.classList.add('from-right');
+          console.log('Transition next: current → gauche, next → droite');
+        } else if (direction === 'prev') {
+          currentImg.classList.add('to-right');
+          nextImg.classList.add('from-left');
+          console.log('Transition prev: current → droite, next → gauche');
+        }
         setTimeout(() => {
-          lightboxImageContainer.classList.remove('slide-left', 'slide-right');
-          lightboxImageContainer.style.transform = 'translateX(0)';
-          lightboxImg.src = newSrc;
-          lightboxImg.alt = newAlt;
+          currentImg.src = newSrc;
+          currentImg.alt = newAlt;
+          currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
+          currentImg.classList.add('current');
+          nextImg.src = '';
+          nextImg.alt = '';
+          nextImg.style.transform = 'translateX(100%)';
+          nextImg.style.opacity = '0';
           isAnimating = false;
           console.log('Transition terminée:', newAlt, 'Direction:', direction);
         }, 400);
@@ -555,10 +644,14 @@
 
     function closeLightbox() {
       lightbox.classList.remove('active');
-      lightboxImg.src = '';
-      lightboxImg.alt = '';
-      lightboxImageContainer.classList.remove('slide-left', 'slide-right');
-      lightboxImageContainer.style.transform = 'translateX(0)';
+      currentImg.src = '';
+      currentImg.alt = '';
+      nextImg.src = '';
+      nextImg.alt = '';
+      currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right', 'current');
+      nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
+      nextImg.style.transform = 'translateX(100%)';
+      nextImg.style.opacity = '0';
       thumbnailContainer.innerHTML = '';
       targetBody.style.overflow = '';
       isAnimating = false;
