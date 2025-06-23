@@ -445,7 +445,7 @@
     // Charger MixItUp
     const script = localDocument.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
-    script.onload = function() {
+    script.onload = () => {
       console.log('MixItUp chargé');
       const mixer = mixitup('.gallery-grid', {
         selectors: {
@@ -453,7 +453,7 @@
         },
         animation: {
           duration: 300,
-          effects: 'fade translateZ(-360px) translateY(20px)',
+          effects: 'fade translateZ(-150px)',
           easing: 'ease'
         }
       });
@@ -482,13 +482,13 @@
         lightbox.className = 'lightbox-overlay';
         lightbox.id = 'global-lightbox';
         lightbox.innerHTML = `
-          <button class="lightbox-close" title="Fermer">×</button>
-          <button class="lightbox-arrow prev" title="Précédente">←</button>
+          <button class="lightbox-close" aria-label="Fermer">×</button>
+          <button class="lightbox-arrow prev" aria-label="Précédente">←</button>
           <div class="lightbox-image-container">
             <img class="lightbox-img current" src="" alt="">
             <img class="lightbox-img next" src="" alt="">
           </div>
-          <button class="lightbox-arrow next" title="Suivante">→</button>
+          <button class="lightbox-arrow next" aria-label="Suivante">→</button>
           <div class="thumbnail-container"></div>
         `;
         targetBody.appendChild(lightbox);
@@ -515,15 +515,15 @@
       return;
     }
 
-    // Précharger l'image suivante et précédente
+    // Précharger les images adjacentes
     function preloadAdjacentImages(index) {
       const visibleImages = getVisibleImages();
-      const prevIndex = index > 0 ? index - 1 : visibleImages.length - 1;
-      const nextIndex = index < visibleImages.length - 1 ? index + 1 : 0;
+      const prevIndex = (index - 1 + visibleImages.length) % visibleImages.length;
+      const nextIndex = (index + 1) % visibleImages.length;
       const urls = [
-        visibleImages[prevIndex].querySelector('img').getAttribute('data-full'),
-        visibleImages[nextIndex].querySelector('img').getAttribute('data-full')
-      ];
+        visibleImages[prevIndex]?.querySelector('img')?.getAttribute('data-full'),
+        visibleImages[nextIndex]?.querySelector('img')?.getAttribute('data-full')
+      ].filter(Boolean);
       urls.forEach(url => {
         const img = new Image();
         img.src = url;
@@ -534,7 +534,7 @@
     function getVisibleImages() {
       const visibleImages = Array.from(galleryItems).filter(item => {
         const style = window.getComputedStyle(item);
-        return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
+        return style.display !== 'none';
       });
       console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').alt));
       return visibleImages;
@@ -545,7 +545,7 @@
       thumbnailContainer.innerHTML = visibleImages.map((item, idx) => `
         <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
              src="${item.querySelector('img').src}" 
-             alt="${item.querySelector('img').alt}" 
+             alt="${item.querySelector('img').alt}"
              data-index="${idx}">
       `).join('');
       thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
@@ -562,15 +562,21 @@
 
     function showLightbox(index, direction = 'none') {
       if (isAnimating || index < 0 || index >= getVisibleImages().length) {
-        console.warn('Animation en cours ou index hors limites:', index, isAnimating);
+        console.warn('Animation en cours ou index invalide:', index, isAnimating);
         isAnimating = false;
         return;
       }
       isAnimating = true;
       const visibleImages = getVisibleImages();
       currentIndex = index;
-      const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-      const newAlt = visibleImages[currentIndex].querySelector('img').alt;
+      const newSrc = visibleImages[currentIndex]?.querySelector('img')?.getAttribute('data-full');
+      const newAlt = visibleImages[currentIndex]?.querySelector('img')?.alt;
+
+      if (!newSrc || !newAlt) {
+        console.error('Erreur : données manquantes pour l’image à l’index', index);
+        isAnimating = false;
+        return;
+      }
 
       // Précharger les images adjacentes
       preloadAdjacentImages(currentIndex);
@@ -597,11 +603,11 @@
         if (direction === 'next') {
           currentImg.classList.add('to-left'); // Actuelle sort à gauche
           nextImg.classList.add('from-right'); // Suivante entre depuis la droite
-          console.log('Transition next: current → gauche, next → droite');
+          console.log('Transition next: current → gauche, prochaine → droite');
         } else if (direction === 'prev') {
           currentImg.classList.add('to-right'); // Actuelle sort à droite
           nextImg.classList.add('from-left'); // Précédente entre depuis la gauche
-          console.log('Transition prev: current → droite, next → gauche');
+          console.log('Transition prev: actuelle → droite, prochaine → gauche');
         }
         setTimeout(() => {
           currentImg.src = newSrc;
@@ -614,13 +620,12 @@
           nextImg.style.opacity = '0';
           isAnimating = false;
           console.log('Transition terminée:', newAlt, 'Direction:', direction);
-        }, 400);
+        }, 300);
       }
 
       lightbox.classList.add('active');
       updateThumbnails();
       targetBody.style.overflow = 'hidden';
-      console.log('Lightbox affiché:', newAlt, 'Index:', currentIndex, 'Direction:', direction);
     }
 
     galleryItems.forEach((item, idx) => {
@@ -638,7 +643,7 @@
           }
         });
       } else {
-        console.warn('Image manquante dans .gallery-item à l\'index:', idx);
+        console.warn('Image manquante dans .gallery-item à l’indice:', idx);
       }
     });
 
@@ -661,23 +666,17 @@
     function showPrev() {
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
-      let idx = currentIndex - 1;
-      if (idx < 0) idx = visibleImages.length - 1;
-      if (visibleImages[idx]) {
-        console.log('Affichage image précédente:', idx);
-        showLightbox(idx, 'prev');
-      }
+      let idx = (currentIndex - 1 + visibleImages.length) % visibleImages.length;
+      console.log('Affichage image précédente:', idx);
+      showLightbox(idx, 'prev');
     }
 
     function showNext() {
       if (isAnimating) return;
       const visibleImages = getVisibleImages();
-      let idx = currentIndex + 1;
-      if (idx >= visibleImages.length) idx = 0;
-      if (visibleImages[idx]) {
-        console.log('Affichage image suivante:', idx);
-        showLightbox(idx, 'next');
-      }
+      let idx = (currentIndex + 1) % visibleImages.length;
+      console.log('Affichage image suivante:', idx);
+      showLightbox(idx, 'next');
     }
 
     prevBtn.addEventListener('click', (e) => {
@@ -700,15 +699,15 @@
 
     lightbox.addEventListener('click', (e) => {
       const target = e.target;
-      if (target === lightbox || target.closest('.lightbox-image-container')) {
-        console.log('Clic sur overlay ou image-container pour fermer');
+      if (target === lightbox || target.closest('.light-box-image-container')) {
+        console.log('Clic sur l’overlay ou image-container pour fermer');
         closeLightbox();
       }
     });
 
-    // Navigation clavier
+    // Navigation au clavier
     targetDocument.addEventListener('keydown', (e) => {
-      if (!lightbox.classList.contains('active') || isAnimating) return;
+      if (!light-box.classList.contains('active') || isAnimating) return;
       if (e.key === 'Escape') {
         console.log('Touche Échap pressée');
         closeLightbox();
@@ -723,19 +722,19 @@
       }
     });
 
-    // Ajuster la hauteur de l'iframe
+    // Ajuster la hauteur de l’iframe
     if (isInIframe) {
       const updateHeight = () => {
         const height = galleryContainer.offsetHeight;
         try {
           window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
-          console.log('Hauteur iframe mise à jour:', height);
         } catch (e) {
-          console.error('Erreur lors de l\'envoi de la hauteur iframe:', e);
+          console.error('Erreur lors de l’envoi de la hauteur dans le code :', e);
         }
       };
       new ResizeObserver(updateHeight).observe(galleryContainer);
       updateHeight();
     }
-  });
 })();
+})();
+</script>
