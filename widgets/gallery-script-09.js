@@ -99,7 +99,7 @@
         position: relative;
         width: 90vw !important;
         height: 70vh !important;
-        overflow: hidden !important; /* AJOUT : Masquer les images hors cadre */
+        overflow: hidden !important;
       }
       .lightbox-img {
         position: absolute;
@@ -114,26 +114,26 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.4s ease !important; /* AJOUT : Transition pour glissement */
-        transform: translateX(0); /* AJOUT : Position initiale */
+        transition: transform 0.4s ease !important;
+        transform: translateX(0);
       }
       .lightbox-img.current {
-        z-index: 1; /* AJOUT : Image actuelle au-dessus */
+        z-index: 1;
       }
       .lightbox-img.next {
-        transform: translateX(100%); /* AJOUT : Image suivante hors cadre à droite */
+        transform: translateX(100%); /* MODIFICATION : Position initiale à droite */
       }
-      .lightbox-img.current.right {
-        transform: translateX(-100%); /* AJOUT : Image actuelle sort à gauche */
+      .lightbox-img.current.to-left {
+        transform: translateX(-100%); /* MODIFICATION : Image actuelle sort à gauche */
       }
       .lightbox-img.next.from-right {
-        transform: translateX(0); /* AJOUT : Image suivante entre depuis la droite */
+        transform: translateX(0); /* MODIFICATION : Image suivante entre depuis la droite */
       }
-      .lightbox-img.current.left {
-        transform: translateX(100%); /* AJOUT : Image actuelle sort à droite */
+      .lightbox-img.current.to-right {
+        transform: translateX(100%); /* MODIFICATION : Image actuelle sort à droite */
       }
       .lightbox-img.next.from-left {
-        transform: translateX(0); /* AJOUT : Image suivante entre depuis la gauche */
+        transform: translateX(0); /* MODIFICATION : Image suivante entre depuis la gauche */
       }
       .lightbox-arrow {
         position: absolute;
@@ -291,13 +291,13 @@
       .lightbox-img.next {
         transform: translateX(100%);
       }
-      .lightbox-img.current.right {
+      .lightbox-img.current.to-left {
         transform: translateX(-100%);
       }
       .lightbox-img.next.from-right {
         transform: translateX(0);
       }
-      .lightbox-img.current.left {
+      .lightbox-img.current.to-right {
         transform: translateX(100%);
       }
       .lightbox-img.next.from-left {
@@ -542,32 +542,40 @@
       const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
       const newAlt = visibleImages[currentIndex].querySelector('img').alt;
 
+      // Réinitialiser les positions et classes
+      currentImg.classList.remove('to-left', 'to-right');
+      nextImg.classList.remove('from-right', 'from-left');
+      nextImg.style.transform = direction === 'prev' ? 'translateX(-100%)' : 'translateX(100%)';
+
       if (direction === 'none') {
-        // Pas d'animation pour la première ouverture ou clic sur vignette active
+        // Pas d'animation pour la première ouverture
         currentImg.src = newSrc;
         currentImg.alt = newAlt;
-        currentImg.classList.remove('right', 'left');
-        nextImg.classList.remove('from-right', 'from-left');
-        nextImg.style.transform = 'translateX(100%)';
+        nextImg.src = '';
+        nextImg.alt = '';
         isAnimating = false;
       } else {
-        // Animation selon la direction
+        // Charger l'image suivante
         nextImg.src = newSrc;
         nextImg.alt = newAlt;
+        // Appliquer les transitions
         if (direction === 'next') {
-          nextImg.classList.add('from-right');
-          currentImg.classList.add('right');
+          currentImg.classList.add('to-left'); // Sort à gauche
+          nextImg.classList.add('from-right'); // Entre depuis la droite
+          console.log('Transition next: current → gauche, next → droite');
         } else if (direction === 'prev') {
-          nextImg.classList.add('from-left');
-          nextImg.style.transform = 'translateX(-100%)';
-          currentImg.classList.add('left');
+          currentImg.classList.add('to-right'); // Sort à droite
+          nextImg.classList.add('from-left'); // Entre depuis la gauche
+          console.log('Transition prev: current → droite, next → gauche');
         }
+        // Échanger les rôles après l'animation
         setTimeout(() => {
-          // Échanger les rôles après l'animation
           currentImg.src = nextImg.src;
           currentImg.alt = nextImg.alt;
-          currentImg.classList.remove('right', 'left');
+          currentImg.classList.remove('to-left', 'to-right');
           nextImg.classList.remove('from-right', 'from-left');
+          nextImg.src = '';
+          nextImg.alt = '';
           nextImg.style.transform = 'translateX(100%)';
           isAnimating = false;
           console.log('Animation terminée, isAnimating:', isAnimating);
@@ -605,7 +613,7 @@
       currentImg.alt = '';
       nextImg.src = '';
       nextImg.alt = '';
-      currentImg.classList.remove('right', 'left');
+      currentImg.classList.remove('to-left', 'to-right');
       nextImg.classList.remove('from-right', 'from-left');
       nextImg.style.transform = 'translateX(100%)';
       thumbnailContainer.innerHTML = '';
@@ -654,9 +662,11 @@
       closeLightbox();
     });
 
+    // MODIFICATION : Fermer l'overlay en cliquant sur lightbox-overlay ou lightbox-image-container
     lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) {
-        console.log('Clic sur l\'overlay pour fermer');
+      const target = e.target;
+      if (target === lightbox || target.closest('.lightbox-image-container')) {
+        console.log('Clic sur overlay ou image-container pour fermer');
         closeLightbox();
       }
     });
