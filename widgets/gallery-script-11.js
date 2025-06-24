@@ -79,7 +79,8 @@
         transform: scale(1.05);
       }
       @media only screen and (min-width: 768px) and (max-width: 920px) {
-        body .custom-gallery .gallery-grid {
+        .custom-gallery .gallery-grid {
+		  display: grid !important;
           grid-template-columns: repeat(2, 1fr) !important;
           gap: 20px !important;
           padding: 16px !important;
