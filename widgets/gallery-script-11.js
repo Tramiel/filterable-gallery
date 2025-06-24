@@ -114,7 +114,7 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.3s ease, opacity 0.3s ease !important;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out !important;
         will-change: transform, opacity;
         transform: translateX(0);
         opacity: 1;
@@ -290,7 +290,7 @@
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
-        transition: transform 0.3s ease, opacity 0.3s ease !important;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out !important;
         will-change: transform, opacity;
         transform: translateX(0);
         opacity: 1;
@@ -583,54 +583,57 @@
       // Précharger les images adjacentes
       preloadAdjacentImages(currentIndex);
 
-      // Réinitialiser les classes
+      // Réinitialiser les classes et styles
       currentImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right', 'current');
       nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
+      currentImg.style.transform = 'translateX(0)';
+      currentImg.style.opacity = '1';
+      nextImg.style.transform = direction === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
+      nextImg.style.opacity = '0';
+      nextImg.src = newSrc;
+      nextImg.alt = newAlt;
+
+      console.log('Initialisation transition:', {
+        direction,
+        currentTransform: currentImg.style.transform,
+        nextTransform: nextImg.style.transform,
+        nextSrc: newSrc
+      });
 
       if (direction === 'none') {
         // Pas d'animation pour la première ouverture
         currentImg.src = newSrc;
         currentImg.alt = newAlt;
-        currentImg.style.transform = 'translateX(0)';
-        currentImg.style.opacity = '1';
+        currentImg.classList.add('current');
         nextImg.src = '';
         nextImg.alt = '';
-        nextImg.style.transform = 'translateX(100%)';
-        nextImg.style.opacity = '0';
         isAnimating = false;
         console.log('Lightbox affiché sans animation:', newAlt, 'Index:', currentIndex);
       } else {
-        // Charger l'image suivante
-        nextImg.src = newSrc;
-        nextImg.alt = newAlt;
-        if (direction === 'next') {
-          // Glisser vers la gauche
-          nextImg.style.transform = 'translateX(100%)'; // Départ à droite
-          nextImg.style.opacity = '0';
-          // Déclencher l'animation après un court délai pour permettre le rendu
-          setTimeout(() => {
+        // Déclencher l'animation
+        requestAnimationFrame(() => {
+          if (direction === 'next') {
             currentImg.classList.add('to-left'); // Actuelle glisse à gauche
             nextImg.classList.add('from-right'); // Suivante glisse depuis la droite
             console.log('Transition next: glisse vers gauche', {
               currentClasses: currentImg.className,
               nextClasses: nextImg.className,
+              currentTransform: currentImg.style.transform,
               nextTransform: nextImg.style.transform
             });
-          }, 10);
-        } else if (direction === 'prev') {
-          // Glisser vers la droite
-          nextImg.style.transform = 'translateX(-100%)'; // Départ à gauche
-          nextImg.style.opacity = '0';
-          setTimeout(() => {
+          } else if (direction === 'prev') {
             currentImg.classList.add('to-right'); // Actuelle glisse à droite
             nextImg.classList.add('from-left'); // Précédente glisse depuis la gauche
             console.log('Transition prev: glisse vers droite', {
               currentClasses: currentImg.className,
               nextClasses: nextImg.className,
+              currentTransform: currentImg.style.transform,
               nextTransform: nextImg.style.transform
             });
-          }, 10);
-        }
+          }
+        });
+
+        // Finaliser après la transition
         setTimeout(() => {
           currentImg.src = newSrc;
           currentImg.alt = newAlt;
@@ -645,7 +648,7 @@
           nextImg.classList.remove('to-left', 'to-right', 'from-left', 'from-right');
           isAnimating = false;
           console.log('Transition terminée:', newAlt, 'Direction:', direction);
-        }, 310); // 300ms transition + 10ms délai
+        }, 300);
       }
 
       lightbox.classList.add('active');
