@@ -13,7 +13,7 @@
     const targetBody = targetDocument.body;
     const localDocument = document;
 
-    // --- CSS RESPONSIVE ---
+    // CSS RESPONSIVE MODIFIÉ
     const style = localDocument.createElement('style');
     style.textContent = `
       .custom-gallery {
@@ -78,7 +78,7 @@
       .gallery-item:hover img {
         transform: scale(1.05);
       }
-      @media (max-width: 919px) {
+      @media (max-width: 920px) and (min-width: 768px) {
         .gallery-grid {
           grid-template-columns: repeat(2, 1fr);
           gap: 20px !important;
@@ -246,6 +246,22 @@
         </div>
       </div>
     `;
+    galleryContainer.classList.add('loaded');
+
+    // Précharger les images pleine résolution (asynchrone)
+    const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
+    if (galleryItems.length === 0) {
+      console.warn('Aucun .gallery-item trouvé dans .gallery-grid');
+    } else {
+      galleryItems.forEach(item => {
+        const img = item.querySelector('img');
+        if (img) {
+          const fullSrc = img.getAttribute('data-full');
+          const preloadImg = new Image();
+          preloadImg.src = fullSrc;
+        }
+      });
+    }
 
     // Charger MixItUp
     const script = localDocument.createElement('script');
@@ -268,12 +284,7 @@
         });
       });
 
-      mixer.on('mixStart', function() {
-        galleryContainer.querySelector('.gallery-grid').style.opacity = '0.5';
-      });
-      mixer.on('mixEnd', function() {
-        galleryContainer.querySelector('.gallery-grid').style.opacity = '1';
-      });
+      mixer.getState && mixer.getState(); // force l'init du grid
 
       // Lightbox
       let lightbox = targetDocument.querySelector('.lightbox-overlay');
@@ -323,7 +334,10 @@
       }
 
       function showLightbox(index) {
-        if (isAnimating || index < 0 || index >= getVisibleImages().length) return;
+        if (isAnimating || index < 0 || index >= getVisibleImages().length) {
+          isAnimating = false;
+          return;
+        }
         isAnimating = true;
         const visibleImages = getVisibleImages();
         currentIndex = index;
@@ -404,5 +418,17 @@
       });
     };
     localDocument.head.appendChild(script);
+
+    // Ajuster la hauteur de l'iframe
+    if (isInIframe) {
+      const updateHeight = () => {
+        const height = galleryContainer.offsetHeight;
+        try {
+          window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
+        } catch (e) {}
+      };
+      new ResizeObserver(updateHeight).observe(galleryContainer);
+      updateHeight();
+    }
   });
 })();
