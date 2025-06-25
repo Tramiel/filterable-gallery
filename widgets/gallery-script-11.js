@@ -78,12 +78,20 @@
       .gallery-item:hover img {
         transform: scale(1.05);
       }
-      @media only screen and (max-width: 767px) {
+
+		@media only screen and (max-width: 500px) {
+		.gallery-grid {
+          grid-template-columns: 1fr !important;
+          gap: 16px !important;
+          padding: 8px !important;
+        }
+		}
+      @media only screen and (min-width: 500px) and (max-width: 920px) {
         .custom-gallery {
           padding: 8px !important;
         }
         .gallery-grid {
-          grid-template-columns: 1fr !important;
+          grid-template-columns: 1fr 1fr !important;
           gap: 16px !important;
           padding: 8px !important;
         }
