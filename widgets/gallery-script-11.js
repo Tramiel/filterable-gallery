@@ -61,7 +61,6 @@
       .gallery-item {
         position: relative;
         width: 100% !important;
-        aspect-ratio: 1/1 !important;
         border-radius: 8px !important;
         overflow: hidden !important;
         background: #fafafa;
