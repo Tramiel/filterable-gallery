@@ -68,7 +68,6 @@
       }
       .gallery-item img {
         width: 100% !important;
-        height: 100% !important;
         object-fit: cover !important;
         display: block !important;
         border-radius: 8px !important;
