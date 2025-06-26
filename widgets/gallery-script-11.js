@@ -7,13 +7,13 @@
       return;
     }
 
-    // Détecter si dans une iframe
+    // Detecter si dans une iframe
     const isInIframe = window.self !== window.top;
     const targetDocument = isInIframe ? window.parent.document : document;
     const targetBody = targetDocument.body;
     const localDocument = document;
 
-    // CSS RESPONSIVE MODIFIÉ
+    // CSS RESPONSIVE MODIFIE
     const style = localDocument.createElement('style');
     style.textContent = `
       .custom-gallery {
@@ -29,11 +29,12 @@
         gap: 16px !important;
         margin: 20px 0 !important;
         padding: 10px 0 !important;
+        font-weight: bold !important;
       }
       .filter-button {
         padding: 8px 20px !important;
-        background: #f0f0f0 !important;
-        border: 1px solid #ddd !important;
+        background: #b09862 !important;
+        color: #fff !important;
         cursor: pointer !important;
         border-radius: 4px !important;
         font-size: 16px !important;
@@ -41,11 +42,10 @@
         white-space: nowrap !important;
       }
       .filter-button:hover {
-        background: #e0e0e0 !important;
+        background: #df5212 !important;
       }
       .filter-button.active, .filter-button[aria-selected="true"] {
-        background: #007bff !important;
-        color: #fff !important;
+        background: #df5212 !important;
         font-weight: bold !important;
       }
       .filter-button:active {
@@ -79,14 +79,14 @@
         transform: scale(1.05);
       }
 
-		@media only screen and (max-width: 500px) {
+		@media only screen and (max-width: 400px) {
 		.gallery-grid {
           grid-template-columns: 1fr !important;
           gap: 16px !important;
           padding: 8px !important;
         }
 		}
-      @media only screen and (min-width: 500px) and (max-width: 920px) {
+      @media only screen and (min-width: 400px) and (max-width: 920px) {
         .custom-gallery {
           padding: 8px !important;
         }
@@ -108,7 +108,7 @@
           font-size: 15px !important;
         }
       }
-      /* Lightbox, thumbnails... (inchangé, tu peux garder le reste de ton CSS existant ici) */
+      /* Lightbox, thumbnails... (inchange, tu peux garder le reste de ton CSS existant ici) */
       .lightbox-overlay {
         display: none;
         position: fixed !important;
@@ -149,7 +149,7 @@
         border: none !important;
         font-size: 2rem !important;
         cursor: pointer !important;
-        padding: 8px 18px !important;
+        padding: 8px 16px !important;
         border-radius: 50% !important;
         z-index: 1000000 !important;
         color: #222 !important;
@@ -198,10 +198,11 @@
         cursor: pointer !important;
         opacity: 0.6 !important;
         transition: opacity 0.3s !important;
+        border: 1px solid #fff !important;
       }
       .thumbnail.active {
         opacity: 1 !important;
-        border: 2px solid #007bff !important;
+        border: 1px solid #df5212 !important;
       }
       .thumbnail:hover {
         opacity: 1 !important;
@@ -222,34 +223,30 @@
     // Injecter le HTML
     galleryContainer.innerHTML = `
       <div class="filter-buttons" role="tablist">
-        <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Toutes</button>
-        <button class="filter-button" data-filter=".mariage" role="tab" aria-selected="false">Coiffures de mariage</button>
-        <button class="filter-button" data-filter=".soiree" role="tab" aria-selected="false">Coiffures de soirée</button>
+        <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Voir tout</button>
+        <button class="filter-button" data-filter=".sols" role="tab" aria-selected="false">Etudes de Sols</button>
+        <button class="filter-button" data-filter=".elan" role="tab" aria-selected="false">Loi Elan</button>
+<button class="filter-button" data-filter=".assainissement" role="tab" aria-selected="false">Assainissement</button>
+<button class="filter-button" data-filter=".references" role="tab" aria-selected="false">Références</button>
       </div>
       <div class="gallery-grid">
-        <div class="gallery-item mix mariage">
-          <img src="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1687079661067-6cb3afbeaff6?auto=format&fit=crop&w=1224"
-               alt="Coiffure élégante pour mariage" 
-               title="Coiffure élégante pour mariage">
+        <div class="gallery-item mix sols">
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
         </div>
-        <div class="gallery-item mix soiree">
-          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1224"
-               alt="Coiffure glamour pour soirée" 
-               title="Coiffure glamour pour soirée">
+        <div class="gallery-item mix elan">
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
         </div>
-        <div class="gallery-item mix mariage">
-          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=250&h=250" 
-               data-full="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1224"
-               alt="Coiffure romantique pour mariage" 
-               title="Coiffure romantique pour mariage">
+        <div class="gallery-item mix assainissement">
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
+        </div>
+        <div class="gallery-item mix references">
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
         </div>
       </div>
     `;
     galleryContainer.classList.add('loaded');
 
-    // Précharger les images pleine résolution (asynchrone)
+    // Precharger les images pleine resolution (asynchrone)
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     if (galleryItems.length === 0) {
       console.warn('Aucun .gallery-item trouvé dans .gallery-grid');
@@ -295,9 +292,9 @@
         lightbox.id = 'global-lightbox';
         lightbox.innerHTML = `
           <button class="lightbox-close" title="Fermer">×</button>
-          <button class="lightbox-arrow prev" title="Précédente">←</button>
+          <button class="lightbox-arrow prev" title="Précédente"><</button>
           <img class="lightbox-img" src="" alt="">
-          <button class="lightbox-arrow next" title="Suivante">→</button>
+          <button class="lightbox-arrow next" title="Suivante">></button>
           <div class="thumbnail-container"></div>
         `;
         targetBody.appendChild(lightbox);
@@ -420,7 +417,7 @@
     };
     localDocument.head.appendChild(script);
 
-    // Ajuster la hauteur de l'iframe
+    // Ajuster la hauteur du iframe
     if (isInIframe) {
       const updateHeight = () => {
         const height = galleryContainer.offsetHeight;
