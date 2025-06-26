@@ -191,8 +191,8 @@
         padding: 10px 0 !important;
       }
       .thumbnail {
-        width: 60px !important;
-        height: 60px !important;
+        width: 100% !important;
+        height: 100% !important;
         object-fit: cover !important;
         border-radius: 4px !important;
         cursor: pointer !important;
@@ -202,7 +202,6 @@
       }
       .thumbnail.active {
         opacity: 1 !important;
-        border: 1px solid #df5212 !important;
       }
       .thumbnail:hover {
         opacity: 1 !important;
@@ -231,16 +230,16 @@
       </div>
       <div class="gallery-grid">
         <div class="gallery-item mix sols">
-          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg">
         </div>
         <div class="gallery-item mix elan">
-          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg">
         </div>
         <div class="gallery-item mix assainissement">
-          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg">
         </div>
         <div class="gallery-item mix references">
-          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
+          <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg">
         </div>
       </div>
     `;
