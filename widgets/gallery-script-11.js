@@ -62,6 +62,7 @@
         justify-content: center !important;
         position: relative !important;
         overflow: hidden !important;
+        min-height: 424px !important;
       }
       .gallery-item {
         position: relative;
@@ -88,6 +89,7 @@
           grid-template-columns: 1fr !important;
           gap: 16px !important;
           padding: 8px !important;
+          min-height: 376px !important;
         }
         .gallery-item {
           height: 180px !important;
@@ -101,6 +103,7 @@
           grid-template-columns: 1fr 1fr !important;
           gap: 16px !important;
           padding: 8px !important;
+          min-height: 396px !important;
         }
         .gallery-item {
           margin-left: 8px !important;
@@ -143,7 +146,7 @@
         display: block !important;
         margin: 0 auto !important;
         opacity: 0;
-        transition: opacity 0.4s ease !important;
+        transition: opacity 0.2s ease !important;
       }
       .lightbox-img.active {
         opacity: 1;
@@ -287,7 +290,7 @@
       const mixer = mixitup('.gallery-grid', {
         selectors: { target: '.gallery-item' },
         animation: {
-          duration: 400,
+          duration: 300,
           effects: 'fade scale(0.95)',
           easing: 'ease-out',
           queue: false
@@ -409,7 +412,7 @@
           lightboxImg.classList.add('active');
           isAnimating = false;
           console.log('Affichage image:', lightboxImg.alt, 'Index:', currentIndex);
-        }, 400);
+        }, 200);
 
         lightbox.classList.add('active');
         updateThumbnails();
