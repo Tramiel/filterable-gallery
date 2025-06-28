@@ -66,7 +66,7 @@
       .gallery-item {
         position: relative;
         width: 100% !important;
-        aspect-ratio: 1 / 1 !important;
+        height: 200px !important;
         border-radius: 8px !important;
         overflow: hidden !important;
         will-change: transform, opacity !important;
@@ -89,6 +89,9 @@
           gap: 16px !important;
           padding: 8px !important;
         }
+        .gallery-item {
+          height: 180px !important;
+        }
       }
       @media only screen and (min-width: 400px) and (max-width: 920px) {
         .custom-gallery {
@@ -102,6 +105,7 @@
         .gallery-item {
           margin-left: 8px !important;
           margin-right: 8px !important;
+          height: 190px !important;
         }
         .filter-buttons {
           gap: 8px !important;
@@ -194,8 +198,8 @@
         padding: 10px 0 !important;
       }
       .thumbnail {
-        width: 100% !important;
-        height: 100% !important;
+        width: 100px !important;
+        height: 75px !important;
         object-fit: cover !important;
         border-radius: 4px !important;
         cursor: pointer !important;
@@ -284,7 +288,7 @@
         selectors: { target: '.gallery-item' },
         animation: {
           duration: 400,
-          effects: 'fade translateY(10px)',
+          effects: 'fade scale(0.95)',
           easing: 'ease-out',
           queue: false
         },
@@ -292,12 +296,21 @@
           onMixStart: function() {
             console.log('Début du filtrage');
             const grid = galleryContainer.querySelector('.gallery-grid');
-            grid.style.overflow = 'hidden';
+            const wrapper = document.createElement('div');
+            wrapper.style.overflow = 'hidden';
+            wrapper.style.position = 'relative';
+            wrapper.className = 'gallery-wrapper';
+            grid.parentNode.insertBefore(wrapper, grid);
+            wrapper.appendChild(grid);
           },
           onMixEnd: function(state) {
             console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
             const grid = galleryContainer.querySelector('.gallery-grid');
-            grid.style.overflow = 'hidden';
+            const wrapper = grid.parentNode;
+            if (wrapper.classList.contains('gallery-wrapper')) {
+              wrapper.parentNode.insertBefore(grid, wrapper);
+              wrapper.remove();
+            }
           }
         }
       });
