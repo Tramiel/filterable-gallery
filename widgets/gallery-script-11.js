@@ -7,13 +7,13 @@
       return;
     }
 
-    // Detecter si dans une iframe
+    // Détecter si dans une iframe
     const isInIframe = window.self !== window.top;
     const targetDocument = isInIframe ? window.parent.document : document;
     const targetBody = targetDocument.body;
     const localDocument = document;
 
-    // CSS RESPONSIVE MODIFIE
+    // Injecter le CSS dans le DOM local
     const style = localDocument.createElement('style');
     style.textContent = `
       .custom-gallery {
@@ -36,6 +36,7 @@
         background: #b09862 !important;
         color: #fff !important;
         cursor: pointer !important;
+        border: 2px solid #b09862 !important;
         border-radius: 4px !important;
         font-size: 16px !important;
         transition: background 0.3s, color 0.3s, transform 0.1s !important;
@@ -43,9 +44,11 @@
       }
       .filter-button:hover {
         background: #df5212 !important;
+        border: 2px solid #df5212 !important;
       }
       .filter-button.active, .filter-button[aria-selected="true"] {
         background: #df5212 !important;
+        border: 2px solid #df5212 !important;
         font-weight: bold !important;
       }
       .filter-button:active {
@@ -57,16 +60,20 @@
         gap: 24px !important;
         padding: 20px !important;
         justify-content: center !important;
+        position: relative !important;
+        overflow: hidden !important;
       }
       .gallery-item {
         position: relative;
         width: 100% !important;
+        aspect-ratio: 1 / 1 !important;
         border-radius: 8px !important;
         overflow: hidden !important;
-        background: #fafafa;
+        will-change: transform, opacity !important;
       }
       .gallery-item img {
         width: 100% !important;
+        height: 100% !important;
         object-fit: cover !important;
         display: block !important;
         border-radius: 8px !important;
@@ -76,14 +83,13 @@
       .gallery-item:hover img {
         transform: scale(1.05);
       }
-
-		@media only screen and (max-width: 400px) {
-		.gallery-grid {
+      @media only screen and (max-width: 400px) {
+        .gallery-grid {
           grid-template-columns: 1fr !important;
           gap: 16px !important;
           padding: 8px !important;
         }
-		}
+      }
       @media only screen and (min-width: 400px) and (max-width: 920px) {
         .custom-gallery {
           padding: 8px !important;
@@ -106,7 +112,6 @@
           font-size: 15px !important;
         }
       }
-      /* Lightbox, thumbnails... (inchange, tu peux garder le reste de ton CSS existant ici) */
       .lightbox-overlay {
         display: none;
         position: fixed !important;
@@ -210,12 +215,15 @@
     // Injecter les styles du lightbox dans le DOM parent
     const parentStyle = targetDocument.createElement('style');
     parentStyle.setAttribute('data-gallery', 'true');
-    parentStyle.textContent = style.textContent; // même CSS pour le parent
+    parentStyle.textContent = style.textContent;
     try {
       const existingStyles = targetDocument.querySelectorAll('style[data-gallery]');
       existingStyles.forEach(style => style.remove());
       targetDocument.head.appendChild(parentStyle);
-    } catch (e) {}
+      console.log('Styles du lightbox injectés dans le DOM parent');
+    } catch (e) {
+      console.error('Erreur lors de l\'injection des styles du lightbox:', e);
+    }
 
     // Injecter le HTML
     galleryContainer.innerHTML = `
@@ -223,57 +231,81 @@
         <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Voir tout</button>
         <button class="filter-button" data-filter=".sols" role="tab" aria-selected="false">Etudes de Sols</button>
         <button class="filter-button" data-filter=".elan" role="tab" aria-selected="false">Loi Elan</button>
-<button class="filter-button" data-filter=".assainissement" role="tab" aria-selected="false">Assainissement</button>
-<button class="filter-button" data-filter=".references" role="tab" aria-selected="false">Références</button>
+        <button class="filter-button" data-filter=".assainissement" role="tab" aria-selected="false">Assainissement</button>
+        <button class="filter-button" data-filter=".references" role="tab" aria-selected="false">Références</button>
       </div>
       <div class="gallery-grid">
         <div class="gallery-item mix sols">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
-data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg">
         </div>
         <div class="gallery-item mix elan">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
-data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg">
         </div>
         <div class="gallery-item mix assainissement">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
-data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg">
         </div>
         <div class="gallery-item mix references">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg"
-data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg">
         </div>
       </div>
     `;
     galleryContainer.classList.add('loaded');
 
-    // Precharger les images pleine resolution (asynchrone)
+    // Précharger les images pleine résolution (asynchrone)
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     if (galleryItems.length === 0) {
       console.warn('Aucun .gallery-item trouvé dans .gallery-grid');
     } else {
+      const preloadImages = [];
       galleryItems.forEach(item => {
         const img = item.querySelector('img');
         if (img) {
           const fullSrc = img.getAttribute('data-full');
           const preloadImg = new Image();
           preloadImg.src = fullSrc;
+          preloadImages.push(fullSrc);
+        } else {
+          console.warn('Image manquante dans .gallery-item:', item);
         }
       });
+      console.log('Images préchargées:', preloadImages);
     }
 
     // Charger MixItUp
     const script = localDocument.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
     script.onload = function() {
+      console.log('MixItUp chargé');
       const mixer = mixitup('.gallery-grid', {
         selectors: { target: '.gallery-item' },
-        animation: { duration: 300, effects: 'fade translateZ(-360px) translateY(20px)', easing: 'ease' }
+        animation: {
+          duration: 400,
+          effects: 'fade translateY(10px)',
+          easing: 'ease-out',
+          queue: false
+        },
+        callbacks: {
+          onMixStart: function() {
+            console.log('Début du filtrage');
+            const grid = galleryContainer.querySelector('.gallery-grid');
+            grid.style.overflow = 'hidden';
+          },
+          onMixEnd: function(state) {
+            console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
+            const grid = galleryContainer.querySelector('.gallery-grid');
+            grid.style.overflow = 'hidden';
+          }
+        }
       });
 
       const filterButtons = galleryContainer.querySelectorAll('.filter-button');
       filterButtons.forEach(button => {
         button.addEventListener('click', function() {
+          console.log('Filtre cliqué:', button.getAttribute('data-filter'));
           filterButtons.forEach(btn => {
             btn.classList.remove('active');
             btn.setAttribute('aria-selected', 'false');
@@ -283,22 +315,26 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
         });
       });
 
-      mixer.getState && mixer.getState(); // force l'init du grid
-
       // Lightbox
       let lightbox = targetDocument.querySelector('.lightbox-overlay');
       if (!lightbox) {
-        lightbox = targetDocument.createElement('div');
-        lightbox.className = 'lightbox-overlay';
-        lightbox.id = 'global-lightbox';
-        lightbox.innerHTML = `
-          <button class="lightbox-close" title="Fermer">×</button>
-          <button class="lightbox-arrow prev" title="Précédente"><</button>
-          <img class="lightbox-img" src="" alt="">
-          <button class="lightbox-arrow next" title="Suivante">></button>
-          <div class="thumbnail-container"></div>
-        `;
-        targetBody.appendChild(lightbox);
+        try {
+          lightbox = targetDocument.createElement('div');
+          lightbox.className = 'lightbox-overlay';
+          lightbox.id = 'global-lightbox';
+          lightbox.innerHTML = `
+            <button class="lightbox-close" title="Fermer">×</button>
+            <button class="lightbox-arrow prev" title="Précédente"><</button>
+            <img class="lightbox-img" src="" alt="">
+            <button class="lightbox-arrow next" title="Suivante">></button>
+            <div class="thumbnail-container"></div>
+          `;
+          targetBody.appendChild(lightbox);
+          console.log('Lightbox créé dans le DOM parent');
+        } catch (e) {
+          console.error('Erreur lors de la création du lightbox:', e);
+          return;
+        }
       }
 
       const lightboxImg = lightbox.querySelector('.lightbox-img');
@@ -309,10 +345,18 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
       let currentIndex = 0;
       let isAnimating = false;
 
+      if (!lightboxImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
+        console.error('Erreur : Éléments du lightbox manquants', { lightboxImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
+        return;
+      }
+
       function getVisibleImages() {
-        return Array.from(galleryContainer.querySelectorAll('.gallery-item')).filter(item =>
-          item.style.display !== 'none' && !item.classList.contains('mixitup-hidden')
-        );
+        const visibleImages = Array.from(galleryItems).filter(item => {
+          const style = window.getComputedStyle(item);
+          return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
+        });
+        console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').src));
+        return visibleImages;
       }
 
       function updateThumbnails() {
@@ -326,6 +370,7 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
         thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
           thumb.addEventListener('click', () => {
             if (!isAnimating) {
+              console.log('Clic sur vignette:', thumb.alt, 'Index:', thumb.getAttribute('data-index'));
               showLightbox(parseInt(thumb.getAttribute('data-index')));
             }
           });
@@ -334,6 +379,7 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
 
       function showLightbox(index) {
         if (isAnimating || index < 0 || index >= getVisibleImages().length) {
+          console.warn('Animation en cours ou index hors limites:', index, isAnimating);
           isAnimating = false;
           return;
         }
@@ -349,6 +395,7 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
           lightboxImg.alt = newAlt;
           lightboxImg.classList.add('active');
           isAnimating = false;
+          console.log('Affichage image:', lightboxImg.alt, 'Index:', currentIndex);
         }, 400);
 
         lightbox.classList.add('active');
@@ -356,12 +403,23 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
         targetBody.style.overflow = 'hidden';
       }
 
-      galleryContainer.querySelectorAll('.gallery-item img').forEach((img, idx) => {
-        img.addEventListener('click', () => {
-          const visibleImages = getVisibleImages();
-          const visibleIndex = visibleImages.findIndex(item => item.querySelector('img') === img);
-          if (visibleIndex !== -1 && !isAnimating) showLightbox(visibleIndex);
-        });
+      galleryItems.forEach((item, idx) => {
+        const img = item.querySelector('img');
+        if (img) {
+          img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Clic sur image:', img.alt, 'Index:', idx);
+            const visibleImages = getVisibleImages();
+            const visibleIndex = visibleImages.indexOf(item);
+            if (visibleIndex !== -1 && !isAnimating) {
+              showLightbox(visibleIndex);
+            } else {
+              console.warn('Image non visible ou animation en cours:', visibleIndex, isAnimating);
+            }
+          });
+        } else {
+          console.warn('Image manquante dans .gallery-item à l\'index:', idx);
+        }
       });
 
       function closeLightbox() {
@@ -372,6 +430,7 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
         thumbnailContainer.innerHTML = '';
         targetBody.style.overflow = '';
         isAnimating = false;
+        console.log('Lightbox fermé');
       }
 
       function showPrev() {
@@ -379,7 +438,10 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
         const visibleImages = getVisibleImages();
         let idx = currentIndex - 1;
         if (idx < 0) idx = visibleImages.length - 1;
-        if (visibleImages[idx]) showLightbox(idx);
+        if (visibleImages[idx]) {
+          console.log('Affichage image précédente:', idx);
+          showLightbox(idx);
+        }
       }
 
       function showNext() {
@@ -387,33 +449,51 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
         const visibleImages = getVisibleImages();
         let idx = currentIndex + 1;
         if (idx >= visibleImages.length) idx = 0;
-        if (visibleImages[idx]) showLightbox(idx);
+        if (visibleImages[idx]) {
+          console.log('Affichage image suivante:', idx);
+          showLightbox(idx);
+        }
       }
 
-      prevBtn.addEventListener('click', e => {
+      prevBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Clic sur flèche précédente');
         showPrev();
       });
 
-      nextBtn.addEventListener('click', e => {
+      nextBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Clic sur flèche suivante');
         showNext();
       });
 
-      closeBtn.addEventListener('click', e => {
+      closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Clic sur bouton fermer');
         closeLightbox();
       });
 
-      lightbox.addEventListener('click', e => {
-        if (e.target === lightbox) closeLightbox();
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+          console.log('Clic sur l\'overlay pour fermer');
+          closeLightbox();
+        }
       });
 
-      targetDocument.addEventListener('keydown', e => {
+      targetDocument.addEventListener('keydown', (e) => {
         if (!lightbox.classList.contains('active') || isAnimating) return;
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowLeft') prevBtn.click();
-        if (e.key === 'ArrowRight') nextBtn.click();
+        if (e.key === 'Escape') {
+          console.log('Touche Échap pressée');
+          closeLightbox();
+        }
+        if (e.key === 'ArrowLeft') {
+          console.log('Touche flèche gauche pressée');
+          showPrev();
+        }
+        if (e.key === 'ArrowRight') {
+          console.log('Touche flèche droite pressée');
+          showNext();
+        }
       });
     };
     localDocument.head.appendChild(script);
@@ -424,7 +504,10 @@ data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations
         const height = galleryContainer.offsetHeight;
         try {
           window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
-        } catch (e) {}
+          console.log('Hauteur iframe mise à jour:', height);
+        } catch (e) {
+          console.error('Erreur lors de l\'envoi de la hauteur iframe:', e);
+        }
       };
       new ResizeObserver(updateHeight).observe(galleryContainer);
       updateHeight();
