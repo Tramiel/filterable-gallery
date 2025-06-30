@@ -35,7 +35,7 @@
       .gallery-grid { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 24px !important; padding: 20px !important; justify-content: center !important; position: relative !important; overflow: hidden !important; min-height: 424px !important; }
       .gallery-item { position: relative; width: 100% !important; height: 200px !important; border-radius: 8px !important; overflow: hidden !important; will-change: transform, opacity !important; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease !important; }
       .gallery-item img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; border-radius: 8px !important; cursor: pointer; transition: transform 0.3s ease !important; }
-      .gallery-item:hover img { transform: scale(1.1); }
+      .gallery-item:hover img { transform: scale(1.05); }
       .gallery-item .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.3s ease !important; pointer-events: none; }
       .gallery-item:hover .overlay { opacity: 1; }
       .gallery-item .caption { position: absolute; bottom: 10px; left: 10px; color: #fff; font-size: 14px; opacity: 0; transform: translateY(10px); transition: opacity 0.3s ease, transform 0.3s ease !important; }
@@ -120,7 +120,6 @@
     `;
     galleryContainer.classList.add('loaded');
 
-    // Précharger les images pleine résolution
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     galleryItems.forEach(item => {
       const img = item.querySelector('img');
@@ -138,7 +137,7 @@
         selectors: { target: '.gallery-item' },
         animation: {
           duration: 600,
-          effects: 'fade scale(0.9) translateY(10px)',
+          effects: 'fade translateY(10px)',
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
           queue: true
         },
