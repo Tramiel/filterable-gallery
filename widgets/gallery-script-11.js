@@ -13,6 +13,14 @@
     const targetBody = targetDocument.body;
     const localDocument = document;
 
+    // Tableau de correspondance pour les textes ALT (à mettre à jour avec vos textes)
+    const altMap = {
+      'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg': 'Étude de sol G5 - Expertise sinistre',
+      'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg': 'Étude de sol G1 - Loi Elan',
+      'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg': 'Étude de sol - Assainissement',
+      'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg': 'Étude de sol G2 - Fondations restaurant scolaire'
+    };
+
     // Injecter le CSS dans le DOM local
     const style = localDocument.createElement('style');
     style.textContent = `
@@ -263,7 +271,7 @@
       console.error('Erreur lors de l\'injection des styles du lightbox:', e);
     }
 
-    // Injecter le HTML sans attributs alt statiques
+    // Injecter le HTML avec attributs alt et title
     galleryContainer.innerHTML = `
       <div class="filter-buttons" role="tablist">
         <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Voir tout</button>
@@ -275,27 +283,35 @@
       <div class="gallery-grid">
         <div class="gallery-item mix sols">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
+               alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg'] || ''}"
+               title="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg'] || ''}">
           <div class="overlay"></div>
-          <div class="caption">Expertise Sinistre</div>
+          <div class="caption">${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg'] || 'Expertise Sinistre'}</div>
         </div>
         <div class="gallery-item mix elan">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
+               alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg'] || ''}"
+               title="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg'] || ''}">
           <div class="overlay"></div>
-          <div class="caption">Loi Elan</div>
+          <div class="caption">${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg'] || 'Loi Elan'}</div>
         </div>
         <div class="gallery-item mix assainissement">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
+               alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg'] || ''}"
+               title="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg'] || ''}">
           <div class="overlay"></div>
-          <div class="caption">Assainissement</div>
+          <div class="caption">${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg'] || 'Assainissement'}</div>
         </div>
         <div class="gallery-item mix references">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg">
+               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg"
+               alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg'] || ''}"
+               title="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg'] || ''}">
           <div class="overlay"></div>
-          <div class="caption">Références</div>
+          <div class="caption">${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg'] || 'Références'}</div>
         </div>
       </div>
     `;
@@ -314,7 +330,7 @@
           const preloadImg = new Image();
           preloadImg.src = fullSrc;
           preloadImages.push(fullSrc);
-          console.log('Image préchargée:', fullSrc, 'ALT:', img.alt || 'non défini');
+          console.log('Image préchargée:', fullSrc, 'ALT:', img.alt || 'non défini', 'Title:', img.title || 'non défini');
         } else {
           console.warn('Image manquante dans .gallery-item:', item);
         }
@@ -417,7 +433,8 @@
         });
         console.log('Images visibles:', visibleImages.map(item => ({
           src: item.querySelector('img').src,
-          alt: item.querySelector('img').alt || 'non défini'
+          alt: item.querySelector('img').alt || 'non défini',
+          title: item.querySelector('img').title || 'non défini'
         })));
         return visibleImages;
       }
@@ -427,12 +444,14 @@
         thumbnailContainer.innerHTML = visibleImages.map((item, idx) => `
           <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
                src="${item.querySelector('img').src}" 
+               alt="${item.querySelector('img').alt || ''}"
+               title="${item.querySelector('img').title || ''}"
                data-index="${idx}">
         `).join('');
         thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
           thumb.addEventListener('click', () => {
             if (!isAnimating) {
-              console.log('Clic sur vignette:', thumb.src, 'Index:', thumb.getAttribute('data-index'));
+              console.log('Clic sur vignette:', thumb.src, 'Index:', thumb.getAttribute('data-index'), 'ALT:', thumb.alt || 'non défini');
               showLightbox(parseInt(thumb.getAttribute('data-index')));
             }
           });
@@ -449,14 +468,17 @@
         const visibleImages = getVisibleImages();
         currentIndex = index;
         const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-        console.log('Affichage image dans lightbox:', newSrc);
+        const newAlt = visibleImages[currentIndex].querySelector('img').alt || '';
+        console.log('Affichage image dans lightbox:', newSrc, 'ALT:', newAlt);
 
         lightboxImg.classList.remove('active');
         setTimeout(() => {
           lightboxImg.src = newSrc;
+          lightboxImg.alt = newAlt;
+          lightboxImg.title = newAlt;
           lightboxImg.classList.add('active');
           isAnimating = false;
-          console.log('Image affichée, Index:', currentIndex);
+          console.log('Image affichée, Index:', currentIndex, 'ALT:', newAlt);
         }, 200);
 
         lightbox.classList.add('active');
@@ -469,7 +491,7 @@
         if (img) {
           img.addEventListener('click', (e) => {
             e.stopPropagation();
-            console.log('Clic sur image:', img.src, 'Index:', idx, 'ALT:', img.alt || 'non défini');
+            console.log('Clic sur image:', img.src, 'Index:', idx, 'ALT:', img.alt || 'non défini', 'Title:', img.title || 'non défini');
             const visibleImages = getVisibleImages();
             const visibleIndex = visibleImages.indexOf(item);
             if (visibleIndex !== -1 && !isAnimating) {
@@ -487,6 +509,7 @@
         lightbox.classList.remove('active');
         lightboxImg.src = '';
         lightboxImg.removeAttribute('alt');
+        lightboxImg.removeAttribute('title');
         thumbnailContainer.innerHTML = '';
         targetBody.style.overflow = '';
         isAnimating = false;
