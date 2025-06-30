@@ -263,7 +263,7 @@
       console.error('Erreur lors de l\'injection des styles du lightbox:', e);
     }
 
-    // Injecter le HTML
+    // Injecter le HTML sans attributs alt statiques
     galleryContainer.innerHTML = `
       <div class="filter-buttons" role="tablist">
         <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Voir tout</button>
@@ -314,6 +314,7 @@
           const preloadImg = new Image();
           preloadImg.src = fullSrc;
           preloadImages.push(fullSrc);
+          console.log('Image préchargée:', fullSrc, 'ALT:', img.alt || 'non défini');
         } else {
           console.warn('Image manquante dans .gallery-item:', item);
         }
@@ -384,7 +385,7 @@
           lightbox.innerHTML = `
             <button class="lightbox-close" title="Fermer">×</button>
             <button class="lightbox-arrow prev" title="Précédente"><</button>
-            <img class="lightbox-img" src="" alt="">
+            <img class="lightbox-img" src="">
             <button class="lightbox-arrow next" title="Suivante">></button>
             <div class="thumbnail-container"></div>
           `;
@@ -414,7 +415,10 @@
           const style = window.getComputedStyle(item);
           return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
         });
-        console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').src));
+        console.log('Images visibles:', visibleImages.map(item => ({
+          src: item.querySelector('img').src,
+          alt: item.querySelector('img').alt || 'non défini'
+        })));
         return visibleImages;
       }
 
@@ -423,13 +427,12 @@
         thumbnailContainer.innerHTML = visibleImages.map((item, idx) => `
           <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
                src="${item.querySelector('img').src}" 
-               alt="${item.querySelector('img').alt}" 
                data-index="${idx}">
         `).join('');
         thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
           thumb.addEventListener('click', () => {
             if (!isAnimating) {
-              console.log('Clic sur vignette:', thumb.alt, 'Index:', thumb.getAttribute('data-index'));
+              console.log('Clic sur vignette:', thumb.src, 'Index:', thumb.getAttribute('data-index'));
               showLightbox(parseInt(thumb.getAttribute('data-index')));
             }
           });
@@ -446,15 +449,14 @@
         const visibleImages = getVisibleImages();
         currentIndex = index;
         const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-        const newAlt = visibleImages[currentIndex].querySelector('img').alt;
+        console.log('Affichage image dans lightbox:', newSrc);
 
         lightboxImg.classList.remove('active');
         setTimeout(() => {
           lightboxImg.src = newSrc;
-          lightboxImg.alt = newAlt;
           lightboxImg.classList.add('active');
           isAnimating = false;
-          console.log('Affichage image:', lightboxImg.alt, 'Index:', currentIndex);
+          console.log('Image affichée, Index:', currentIndex);
         }, 200);
 
         lightbox.classList.add('active');
@@ -467,7 +469,7 @@
         if (img) {
           img.addEventListener('click', (e) => {
             e.stopPropagation();
-            console.log('Clic sur image:', img.alt, 'Index:', idx);
+            console.log('Clic sur image:', img.src, 'Index:', idx, 'ALT:', img.alt || 'non défini');
             const visibleImages = getVisibleImages();
             const visibleIndex = visibleImages.indexOf(item);
             if (visibleIndex !== -1 && !isAnimating) {
@@ -484,8 +486,7 @@
       function closeLightbox() {
         lightbox.classList.remove('active');
         lightboxImg.src = '';
-        lightboxImg.alt = '';
-        lightboxImg.classList.remove('active');
+        lightboxImg.removeAttribute('alt');
         thumbnailContainer.innerHTML = '';
         targetBody.style.overflow = '';
         isAnimating = false;
