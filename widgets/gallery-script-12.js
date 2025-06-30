@@ -35,8 +35,8 @@
       .gallery-grid { display: block !important; padding: 20px !important; position: relative !important; overflow: hidden !important; min-height: 424px !important; opacity: 0; transition: opacity 0.6s ease; }
       .gallery-grid.is-loaded { opacity: 1; }
       .grid-sizer { width: calc(33.333% - 16px) !important; }
-      .gallery-item { position: absolute; width: calc(33.333% - 16px) !important; margin: 8px !important; height: 200px !important; border-radius: 8px !important; overflow: hidden !important; will-change: transform, opacity !important; transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important; }
-      .gallery-item.isotope-hidden { opacity: 0 !important; transform: scale(0.8); pointer-events: none; }
+      .gallery-item { position: absolute !important; width: calc(33.333% - 16px) !important; margin: 8px !important; height: 200px !important; border-radius: 8px !important; overflow: hidden !important; will-change: transform, opacity !important; transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+      .gallery-item.isotope-hidden { opacity: 0 !important; transform: scale(0.8) !important; pointer-events: none !important; }
       .gallery-item img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; border-radius: 8px !important; cursor: pointer; transition: transform 0.3s ease !important; }
       .gallery-item:hover img { transform: scale(1.05); }
       .gallery-item .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.3s ease !important; pointer-events: none; }
@@ -54,7 +54,7 @@
         .filter-buttons { gap: 8px !important; padding: 4px 0 !important; }
         .filter-button { padding: 8px 10px !important; font-size: 15px !important; }
       }
-      .lg-container { z-index: 999999 !important; }
+      .lg-container { z-index: 999999 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; }
       .lg-sub-html { color: #fff; font-size: 14px; padding: 10px; }
     `;
     localDocument.head.appendChild(style);
@@ -113,12 +113,9 @@
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
     galleryItems.forEach(item => {
       const img = item.querySelector('img');
-      if (img) {
-        const src = img.getAttribute('src');
-        if (src) {
-          const preloadImg = new Image();
-          preloadImg.src = src;
-        }
+      if (img && img.src) {
+        const preloadImg = new Image();
+        preloadImg.src = img.src;
       }
     });
 
@@ -170,6 +167,9 @@
         }
       });
 
+      // Forcer le recalcul de la disposition après un court délai
+      setTimeout(() => iso.layout(), 100);
+
       // Utilisation d'imagesLoaded pour éviter les scintillements
       imagesLoaded(grid, { background: true }, function() {
         iso.layout();
@@ -196,11 +196,17 @@
         speed: 600,
         counter: false,
         download: false,
+        closeOnTap: true,
+        enableDrag: true,
+        enableSwipe: true,
+        getCaptionFromTitleOrAlt: true,
         subHtmlSelectorRelative: true,
+        appendSubHtmlTo: '.lg-sub-html',
         mobileSettings: {
           showCloseIcon: true,
           controls: true
-        }
+        },
+        licenseKey: '0000-0000-000-0000' // À remplacer par une clé valide en production
       });
 
       // Gestion de la hauteur de l'iframe
