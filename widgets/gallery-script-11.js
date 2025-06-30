@@ -335,9 +335,7 @@
           duration: 600,
           effects: 'fade scale(0.9) translateY(10px)',
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-          queue: false,
-          animate: 'stagger',
-          stagger: 30
+          queue: true
         },
         callbacks: {
           onMixStart: function() {
@@ -372,6 +370,7 @@
           });
           this.classList.add('active');
           this.setAttribute('aria-selected', 'true');
+          mixer.filter(button.getAttribute('data-filter')); // Appliquer le filtre
         });
       });
 
