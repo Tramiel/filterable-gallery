@@ -8,7 +8,7 @@
     const targetBody = targetDocument.body;
     const localDocument = document;
 
-    // Tableau pour les attributs ALT
+    // Tableau pour les attributs ALT et TITLE
     const altMap = {
       'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg': 'Étude de sol G5 - Expertise sinistre',
       'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg': 'Étude de sol G1 - Loi Elan',
@@ -16,7 +16,6 @@
       'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg': 'Étude de sol G2 - Fondations restaurant scolaire'
     };
 
-    // Tableau pour les attributs TITLE
     const titleMap = {
       'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg': 'Étude de sol G5 - Expertise sinistre',
       'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg': 'Étude de sol G1 - Loi Elan',
@@ -35,6 +34,7 @@
       .filter-button:active { transform: scale(0.95) !important; }
       .gallery-grid { display: block !important; padding: 20px !important; position: relative !important; overflow: hidden !important; min-height: 424px !important; opacity: 0; transition: opacity 0.6s ease; }
       .gallery-grid.is-loaded { opacity: 1; }
+      .grid-sizer { width: calc(33.333% - 16px) !important; }
       .gallery-item { position: absolute; width: calc(33.333% - 16px) !important; margin: 8px !important; height: 200px !important; border-radius: 8px !important; overflow: hidden !important; will-change: transform, opacity !important; transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important; }
       .gallery-item.isotope-hidden { opacity: 0 !important; transform: scale(0.8); pointer-events: none; }
       .gallery-item img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; border-radius: 8px !important; cursor: pointer; transition: transform 0.3s ease !important; }
@@ -45,16 +45,17 @@
       .gallery-item:hover .caption { opacity: 1; transform: translateY(0); }
       @media only screen and (max-width: 400px) {
         .gallery-grid { padding: 8px !important; min-height: 376px !important; }
-        .gallery-item { width: calc(100% - 16px) !important; height: 180px !important; }
+        .grid-sizer, .gallery-item { width: calc(100% - 16px) !important; height: 180px !important; }
       }
       @media only screen and (min-width: 400px) and (max-width: 920px) {
         .custom-gallery { padding: 8px !important; }
         .gallery-grid { padding: 8px !important; min-height: 396px !important; }
-        .gallery-item { width: calc(50% - 16px) !important; margin: 8px !important; height: 190px !important; }
+        .grid-sizer, .gallery-item { width: calc(50% - 16px) !important; height: 190px !important; }
         .filter-buttons { gap: 8px !important; padding: 4px 0 !important; }
         .filter-button { padding: 8px 10px !important; font-size: 15px !important; }
       }
       .lg-container { z-index: 999999 !important; }
+      .lg-sub-html { color: #fff; font-size: 14px; padding: 10px; }
     `;
     localDocument.head.appendChild(style);
 
@@ -76,33 +77,29 @@
       </div>
       <div class="gallery-grid">
         <div class="grid-sizer"></div>
-        <div class="gallery-item sols" data-lg-id="1">
+        <div class="gallery-item sols" data-src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg" data-sub-html="<h4>Étude de sol G5 - Expertise sinistre</h4>">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
                alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg'] || ''}"
                title="${titleMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg'] || ''}">
           <div class="overlay"></div>
           <div class="caption">${titleMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg'] || 'Expertise Sinistre'}</div>
         </div>
-        <div class="gallery-item elan" data-lg-id="2">
+        <div class="gallery-item elan" data-src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg" data-sub-html="<h4>Étude de sol G1 - Loi Elan</h4>">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
                alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg'] || ''}"
                title="${titleMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg'] || ''}">
           <div class="overlay"></div>
           <div class="caption">${titleMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg'] || 'Loi Elan'}</div>
         </div>
-        <div class="gallery-item assainissement" data-lg-id="3">
+        <div class="gallery-item assainissement" data-src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg" data-sub-html="<h4>Étude de sol - Assainissement</h4>">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
                alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg'] || ''}"
                title="${titleMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg'] || ''}">
           <div class="overlay"></div>
           <div class="caption">${titleMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg'] || 'Assainissement'}</div>
         </div>
-        <div class="gallery-item references" data-lg-id="4">
+        <div class="gallery-item references" data-src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg" data-sub-html="<h4>Étude de sol G2 - Fondations restaurant scolaire</h4>">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg"
-               data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg"
                alt="${altMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg'] || ''}"
                title="${titleMap['https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg'] || ''}">
           <div class="overlay"></div>
@@ -117,9 +114,11 @@
     galleryItems.forEach(item => {
       const img = item.querySelector('img');
       if (img) {
-        const fullSrc = img.getAttribute('data-full');
-        const preloadImg = new Image();
-        preloadImg.src = fullSrc;
+        const src = img.getAttribute('src');
+        if (src) {
+          const preloadImg = new Image();
+          preloadImg.src = src;
+        }
       }
     });
 
@@ -144,8 +143,15 @@
       script.src = src;
       script.async = true;
       script.onload = checkAllScriptsLoaded;
+      script.onerror = () => console.error(`Erreur de chargement du script : ${src}`);
       localDocument.head.appendChild(script);
     });
+
+    // Ajout du CSS pour lightGallery
+    const lgStyle = localDocument.createElement('link');
+    lgStyle.rel = 'stylesheet';
+    lgStyle.href = 'https://cdn.jsdelivr.net/npm/lightgallery@2.7.0/css/lightgallery.css';
+    localDocument.head.appendChild(lgStyle);
 
     function initializeGallery() {
       const grid = galleryContainer.querySelector('.gallery-grid');
@@ -159,14 +165,14 @@
         transitionDuration: '0.6s',
         stagger: 30,
         masonry: {
-          columnWidth: '.grid-sizer'
+          columnWidth: '.grid-sizer',
+          gutter: 16
         }
       });
 
       // Utilisation d'imagesLoaded pour éviter les scintillements
-      imagesLoaded(grid).on('progress', function() {
+      imagesLoaded(grid, { background: true }, function() {
         iso.layout();
-      }).on('done', function() {
         grid.classList.add('is-loaded');
       });
 
@@ -190,6 +196,7 @@
         speed: 600,
         counter: false,
         download: false,
+        subHtmlSelectorRelative: true,
         mobileSettings: {
           showCloseIcon: true,
           controls: true
