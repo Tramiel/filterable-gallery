@@ -30,13 +30,13 @@
     // Ajout des styles CSS
     const style = localDocument.createElement('style');
     style.textContent = `
-      .custom-gallery { max-width: 1224px; margin: 0 auto; padding: 20px; display: block !important; }
+      .custom-gallery { max-width: 1224px; margin: 0 auto; padding: 20px; display: block !important; position: relative !important; }
       .filter-buttons { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 16px !important; margin: 20px 0 !important; padding: 10px 0 !important; font-weight: bold !important; }
       .filter-button { padding: 8px 20px !important; background: #b09862 !important; color: #fff !important; cursor: pointer !important; border: 2px solid #b09862 !important; border-radius: 4px !important; font-size: 16px !important; transition: background 0.3s, color 0.3s, transform 0.1s !important; white-space: nowrap !important; }
       .filter-button:hover { background: #df5212 !important; border: 2px solid #df5212 !important; }
       .filter-button.active, .filter-button[aria-selected="true"] { background: #df5212 !important; border: 2px solid #df5212 !important; font-weight: bold !important; }
       .filter-button:active { transform: scale(0.95) !important; }
-      .gallery-grid { display: block !important; padding: 20px !important; position: relative !important; overflow: hidden !important; min-height: 424px !important; opacity: 0; transition: opacity 0.6s ease !important; }
+      .gallery-grid { display: block !important; padding: 20px !important; position: relative !important; overflow: hidden !important; min-height: 424px !important; opacity: 0; transition: opacity 0.6s ease !important; width: 100% !important; }
       .gallery-grid.is-loaded { opacity: 1 !important; }
       .grid-sizer { width: calc(33.333% - 16px) !important; height: 0 !important; }
       .gallery-item { position: absolute !important; width: calc(33.333% - 16px) !important; margin: 8px !important; height: 200px !important; border-radius: 8px !important; overflow: hidden !important; will-change: transform, opacity !important; transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important; }
@@ -113,6 +113,7 @@
       </div>
     `;
     galleryContainer.classList.add('loaded');
+    console.log('HTML de la galerie inséré');
 
     // Préchargement des images
     const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
@@ -121,8 +122,8 @@
       if (img && img.src) {
         const preloadImg = new Image();
         preloadImg.src = img.src;
-        preloadImg.onerror = () => console.error(`Erreur de chargement de l'image : ${img.src}`);
         preloadImg.onload = () => console.log(`Image chargée : ${img.src}`);
+        preloadImg.onerror = () => console.error(`Erreur de chargement de l'image : ${img.src}`);
       }
     });
 
@@ -177,6 +178,18 @@
         return;
       }
 
+      // Vérifier si imagesLoaded est chargé
+      if (typeof imagesLoaded === 'undefined') {
+        console.error('imagesLoaded non chargé');
+        return;
+      }
+
+      // Vérifier si lightGallery est chargé
+      if (typeof lightGallery === 'undefined') {
+        console.error('lightGallery non chargé');
+        return;
+      }
+
       // Initialisation d'Isotope
       const iso = new Isotope(grid, {
         itemSelector: '.gallery-item',
@@ -199,12 +212,23 @@
           iso.layout();
           console.log('Disposition forcée après délai');
         }, 500);
+        setTimeout(() => {
+          iso.layout();
+          console.log('Disposition forcée après second délai');
+        }, 1000);
+      });
+
+      // Gestion du redimensionnement de la fenêtre
+      window.addEventListener('resize', () => {
+        iso.layout();
+        console.log('Disposition recalculée après redimensionnement');
       });
 
       // Gestion des filtres
       let lgInstance = null;
       filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
           console.log(`Clic sur le bouton de filtrage : ${this.getAttribute('data-filter')}`);
           filterButtons.forEach(btn => {
             btn.classList.remove('active');
@@ -219,6 +243,7 @@
               console.log('Filtrage terminé, mise à jour de lightGallery');
               if (lgInstance) {
                 lgInstance.destroy(true);
+                console.log('lightGallery détruit');
               }
               lgInstance = lightGallery(grid, {
                 selector: '.gallery-item:not(.isotope-hidden)',
@@ -238,8 +263,22 @@
                 licenseKey: '0000-0000-000-0000', // À remplacer par une clé valide en production
                 container: isInIframe ? targetBody : localDocument.body
               });
+              console.log('lightGallery réinitialisé');
             }
           });
+        });
+      });
+
+      // Gestion manuelle des clics pour lightGallery
+      galleryItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log(`Clic sur l'image : ${this.getAttribute('data-src')}`);
+          if (!this.classList.contains('isotope-hidden')) {
+            if (lgInstance) {
+              lgInstance.openGallery(galleryItems.indexOf(this));
+            }
+          }
         });
       });
 
@@ -262,6 +301,7 @@
         licenseKey: '0000-0000-000-0000', // À remplacer par une clé valide en production
         container: isInIframe ? targetBody : localDocument.body
       });
+      console.log('lightGallery initialisé');
 
       // Gestion de la hauteur de l'iframe
       if (isInIframe) {
