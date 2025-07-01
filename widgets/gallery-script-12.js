@@ -63,10 +63,6 @@
         position: relative !important;
         overflow: hidden !important;
         min-height: 424px !important;
-        opacity: 0;
-        transition: opacity 0.6s ease !important;
-      }
-      .gallery-grid.loaded {
         opacity: 1 !important;
       }
       .gallery-item {
@@ -76,17 +72,13 @@
         border-radius: 8px !important;
         overflow: hidden !important;
         will-change: transform, opacity !important;
-        opacity: 0;
-        transform: scale(0.95) translateY(20px);
-        transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      }
-      .gallery-item.mixitup-shown {
         opacity: 1 !important;
-        transform: scale(1) translateY(0) !important;
+        transform: none !important;
+        transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
       }
       .gallery-item.mixitup-hidden {
         opacity: 0 !important;
-        transform: scale(0.95) translateY(20px) !important;
+        transform: scale(0.95) !important;
         pointer-events: none !important;
       }
       .gallery-item img {
@@ -383,24 +375,46 @@
       const mixer = mixitup('.gallery-grid', {
         selectors: { target: '.gallery-item' },
         animation: {
-          duration: 600,
-          effects: 'fade scale(0.8) translateY(20px)',
-          easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          duration: 400,
+          effects: 'fade scale(0.95)',
+          easing: 'ease-out',
           queue: false
         },
         callbacks: {
           onMixStart: function() {
             console.log('Début du filtrage');
             const grid = galleryContainer.querySelector('.gallery-grid');
-            grid.classList.remove('loaded');
+            grid.style.overflow = 'hidden';
           },
           onMixEnd: function(state) {
             console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
             const grid = galleryContainer.querySelector('.gallery-grid');
-            grid.classList.add('loaded');
+            grid.style.overflow = 'hidden';
+            setTimeout(() => {
+              grid.style.overflow = '';
+              console.log('Overflow restauré après filtrage');
+            }, 400);
+            // Forcer l'affichage des éléments visibles
+            galleryItems.forEach(item => {
+              if (!item.classList.contains('mixitup-hidden')) {
+                item.style.opacity = '1 !important';
+                item.style.transform = 'none !important';
+              }
+            });
           }
         }
       });
+
+      // Forcer l'affichage initial
+      setTimeout(() => {
+        galleryItems.forEach(item => {
+          item.style.opacity = '1 !important';
+          item.style.transform = 'none !important';
+          console.log('Affichage forcé pour:', item.querySelector('img').src);
+        });
+        mixer.forceRefresh();
+        console.log('MixItUp forcé à rafraîchir');
+      }, 100);
 
       const filterButtons = galleryContainer.querySelectorAll('.filter-button');
       filterButtons.forEach(button => {
