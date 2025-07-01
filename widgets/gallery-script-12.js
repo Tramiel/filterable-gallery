@@ -54,6 +54,11 @@
       .filter-button:active {
         transform: scale(0.95) !important;
       }
+      .filter-button.disabled {
+        pointer-events: none !important;
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+      }
       .gallery-grid {
         display: grid !important;
         grid-template-columns: repeat(3, 1fr);
@@ -378,54 +383,40 @@
           duration: 400,
           effects: 'fade scale(0.95)',
           easing: 'ease-out',
-          queue: false
+          queue: true
         },
         callbacks: {
-          onMixStart: function() {
-            console.log('Début du filtrage');
-            const grid = galleryContainer.querySelector('.gallery-grid');
-            grid.style.overflow = 'hidden';
+          onMixStart: function(state) {
+            console.log('Début du filtrage:', state.activeFilter.selector);
+            const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+            filterButtons.forEach(btn => btn.classList.add('disabled'));
           },
           onMixEnd: function(state) {
             console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
-            const grid = galleryContainer.querySelector('.gallery-grid');
-            grid.style.overflow = 'hidden';
-            setTimeout(() => {
-              grid.style.overflow = '';
-              console.log('Overflow restauré après filtrage');
-            }, 400);
-            // Forcer l'affichage des éléments visibles
-            galleryItems.forEach(item => {
-              if (!item.classList.contains('mixitup-hidden')) {
-                item.style.opacity = '1 !important';
-                item.style.transform = 'none !important';
-              }
-            });
+            const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+            filterButtons.forEach(btn => btn.classList.remove('disabled'));
           }
         }
       });
 
-      // Forcer l'affichage initial
-      setTimeout(() => {
-        galleryItems.forEach(item => {
-          item.style.opacity = '1 !important';
-          item.style.transform = 'none !important';
-          console.log('Affichage forcé pour:', item.querySelector('img').src);
-        });
-        mixer.forceRefresh();
-        console.log('MixItUp forcé à rafraîchir');
-      }, 100);
-
       const filterButtons = galleryContainer.querySelectorAll('.filter-button');
       filterButtons.forEach(button => {
         button.addEventListener('click', function() {
-          console.log('Filtre cliqué:', button.getAttribute('data-filter'));
+          if (button.classList.contains('disabled')) {
+            console.log('Clic ignoré: bouton désactivé pendant l\'animation');
+            return;
+          }
+          const filter = button.getAttribute('data-filter');
+          console.log('Filtre cliqué:', filter);
           filterButtons.forEach(btn => {
             btn.classList.remove('active');
             btn.setAttribute('aria-selected', 'false');
           });
-          this.classList.add('active');
-          this.setAttribute('aria-selected', 'true');
+          button.classList.add('active');
+          button.setAttribute('aria-selected', 'true');
+          mixer.filter(filter === 'all' ? 'all' : filter).catch(err => {
+            console.error('Erreur MixItUp:', err);
+          });
         });
       });
 
