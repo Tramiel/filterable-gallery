@@ -2,7 +2,10 @@
   // Attendre que la fenêtre soit complètement chargée
   window.addEventListener('load', function() {
     const galleryContainer = document.querySelector('.custom-gallery');
-    if (!galleryContainer) return;
+    if (!galleryContainer) {
+      console.error('Conteneur .custom-gallery non trouvé');
+      return;
+    }
 
     const isInIframe = window.self !== window.top;
     const targetDocument = isInIframe ? window.parent.document : document;
@@ -56,8 +59,8 @@
         .filter-button { padding: 8px 10px !important; font-size: 15px !important; }
       }
       .lg-container { z-index: 1000000 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; }
-      .lg-sub-html { color: #fff !important; font-size: 14px !important; padding: 10px !important; }
       .lg-backdrop { z-index: 999999 !important; }
+      .lg-sub-html { color: #fff !important; font-size: 14px !important; padding: 10px !important; }
     `;
     localDocument.head.appendChild(style);
 
@@ -119,6 +122,7 @@
         const preloadImg = new Image();
         preloadImg.src = img.src;
         preloadImg.onerror = () => console.error(`Erreur de chargement de l'image : ${img.src}`);
+        preloadImg.onload = () => console.log(`Image chargée : ${img.src}`);
       }
     });
 
@@ -133,6 +137,7 @@
     let scriptsLoaded = 0;
     function checkAllScriptsLoaded() {
       scriptsLoaded++;
+      console.log(`Script chargé ${scriptsLoaded}/${scripts.length}`);
       if (scriptsLoaded === scripts.length) {
         initializeGallery();
       }
@@ -156,8 +161,21 @@
     localDocument.head.appendChild(lgStyle);
 
     function initializeGallery() {
+      console.log('Initialisation de la galerie');
       const grid = galleryContainer.querySelector('.gallery-grid');
       const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+
+      // Vérifier si jQuery est chargé
+      if (typeof jQuery === 'undefined') {
+        console.error('jQuery non chargé');
+        return;
+      }
+
+      // Vérifier si Isotope est chargé
+      if (typeof Isotope === 'undefined') {
+        console.error('Isotope non chargé');
+        return;
+      }
 
       // Initialisation d'Isotope
       const iso = new Isotope(grid, {
@@ -172,17 +190,22 @@
         }
       });
 
-      // Forcer le recalcul de la disposition après chargement
+      // Forcer le recalcul de la disposition
       imagesLoaded(grid, { background: true }, function() {
+        console.log('Images chargées, recalcul de la disposition');
         iso.layout();
         grid.classList.add('is-loaded');
-        setTimeout(() => iso.layout(), 100); // Recalcul supplémentaire
+        setTimeout(() => {
+          iso.layout();
+          console.log('Disposition forcée après délai');
+        }, 500);
       });
 
-      // Gestion des filtres avec mise à jour de lightGallery
+      // Gestion des filtres
       let lgInstance = null;
       filterButtons.forEach(button => {
         button.addEventListener('click', function() {
+          console.log(`Clic sur le bouton de filtrage : ${this.getAttribute('data-filter')}`);
           filterButtons.forEach(btn => {
             btn.classList.remove('active');
             btn.setAttribute('aria-selected', 'false');
@@ -193,7 +216,7 @@
           iso.arrange({
             filter: filterValue,
             onArrangeComplete: () => {
-              // Mettre à jour lightGallery pour n'inclure que les éléments visibles
+              console.log('Filtrage terminé, mise à jour de lightGallery');
               if (lgInstance) {
                 lgInstance.destroy(true);
               }
@@ -213,7 +236,7 @@
                   controls: true
                 },
                 licenseKey: '0000-0000-000-0000', // À remplacer par une clé valide en production
-                container: isInIframe ? targetBody : localDocument.body // Attacher au body parent en iframe
+                container: isInIframe ? targetBody : localDocument.body
               });
             }
           });
@@ -237,7 +260,7 @@
           controls: true
         },
         licenseKey: '0000-0000-000-0000', // À remplacer par une clé valide en production
-        container: isInIframe ? targetBody : localDocument.body // Attacher au body parent en iframe
+        container: isInIframe ? targetBody : localDocument.body
       });
 
       // Gestion de la hauteur de l'iframe
@@ -245,6 +268,7 @@
         const updateHeight = () => {
           const height = galleryContainer.offsetHeight;
           window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
+          console.log(`Hauteur de l'iframe mise à jour : ${height}px`);
         };
         new ResizeObserver(updateHeight).observe(galleryContainer);
         updateHeight();
