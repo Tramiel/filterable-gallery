@@ -399,6 +399,11 @@
               console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
               const filterButtons = galleryContainer.querySelectorAll('.filter-button');
               filterButtons.forEach(btn => btn.classList.remove('disabled'));
+              // Vérifier l'état des éléments après filtrage
+              console.log('État des éléments après filtrage:', Array.from(galleryItems).map(item => ({
+                classes: item.className,
+                visible: !item.classList.contains('mixitup-hidden')
+              })));
             },
             onMixFail: function(state) {
               console.error('Échec du filtrage:', state.activeFilter.selector);
@@ -406,13 +411,16 @@
           }
         });
 
-        // Initialiser le filtre "all" après chargement
+        // Initialiser le filtre "all" après un délai
         setTimeout(() => {
           console.log('Initialisation du filtre par défaut: all');
-          mixer.filter('all').catch(err => {
+          try {
+            mixer.filter('all');
+            console.log('Filtre par défaut appliqué: all');
+          } catch (err) {
             console.error('Erreur lors de l\'initialisation du filtre:', err);
-          });
-        }, 100);
+          }
+        }, 500);
 
         const filterButtons = galleryContainer.querySelectorAll('.filter-button');
         filterButtons.forEach(button => {
@@ -430,7 +438,7 @@
             button.classList.add('active');
             button.setAttribute('aria-selected', 'true');
             try {
-              mixer.filter(filter === 'all' ? 'all' : filter);
+              mixer.filter(filter);
               console.log('Filtre appliqué:', filter);
             } catch (err) {
               console.error('Erreur lors de l\'application du filtre:', err);
@@ -439,7 +447,7 @@
         });
 
         // Vérifier l'état initial des éléments
-        console.log('Éléments de la grille:', Array.from(galleryItems).map(item => ({
+        console.log('Éléments de la grille avant initialisation:', Array.from(galleryItems).map(item => ({
           classes: item.className,
           visible: window.getComputedStyle(item).display !== 'none'
         })));
@@ -627,9 +635,75 @@
         });
       } catch (e) {
         console.error('Erreur lors de l\'initialisation de MixItUp:', e);
+        // Logique de secours : filtrage manuel
+        console.log('Tentative de filtrage manuel en secours');
+        const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const filter = button.getAttribute('data-filter');
+            console.log('Filtre manuel cliqué:', filter);
+            filterButtons.forEach(btn => {
+              btn.classList.remove('active');
+              btn.setAttribute('aria-selected', 'false');
+            });
+            button.classList.add('active');
+            button.setAttribute('aria-selected', 'true');
+            galleryItems.forEach(item => {
+              if (filter === 'all' || item.classList.contains(filter.replace('.', ''))) {
+                item.style.opacity = '1';
+                item.style.transform = 'none';
+                item.style.display = 'block';
+                item.classList.remove('mixitup-hidden');
+              } else {
+                item.style.opacity = '0';
+                item.style.transform = 'scale(0.95)';
+                item.style.display = 'none';
+                item.classList.add('mixitup-hidden');
+              }
+            });
+            console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
+              classes: item.className,
+              visible: item.style.display !== 'none'
+            })));
+          });
+        });
       }
     };
-    script.onerror = () => console.error('Erreur de chargement de MixItUp');
+    script.onerror = () => {
+      console.error('Erreur de chargement de MixItUp');
+      // Logique de secours : filtrage manuel
+      console.log('MixItUp non chargé, activation du filtrage manuel');
+      const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+      filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const filter = button.getAttribute('data-filter');
+          console.log('Filtre manuel cliqué:', filter);
+          filterButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+          });
+          button.classList.add('active');
+          button.setAttribute('aria-selected', 'true');
+          galleryItems.forEach(item => {
+            if (filter === 'all' || item.classList.contains(filter.replace('.', ''))) {
+              item.style.opacity = '1';
+              item.style.transform = 'none';
+              item.style.display = 'block';
+              item.classList.remove('mixitup-hidden');
+            } else {
+              item.style.opacity = '0';
+              item.style.transform = 'scale(0.95)';
+              item.style.display = 'none';
+              item.classList.add('mixitup-hidden');
+            }
+          });
+          console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
+            classes: item.className,
+            visible: item.style.display !== 'none'
+          })));
+        });
+      });
+    };
     localDocument.head.appendChild(script);
 
     // Ajuster la hauteur du iframe
