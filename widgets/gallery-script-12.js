@@ -377,230 +377,257 @@
     script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
     script.onload = function() {
       console.log('MixItUp chargé');
-      const mixer = mixitup('.gallery-grid', {
-        selectors: { target: '.gallery-item' },
-        animation: {
-          duration: 400,
-          effects: 'fade scale(0.95)',
-          easing: 'ease-out',
-          queue: true
-        },
-        callbacks: {
-          onMixStart: function(state) {
-            console.log('Début du filtrage:', state.activeFilter.selector);
-            const filterButtons = galleryContainer.querySelectorAll('.filter-button');
-            filterButtons.forEach(btn => btn.classList.add('disabled'));
+      try {
+        const mixer = mixitup('.gallery-grid', {
+          selectors: {
+            target: '.gallery-item',
+            filter: '.filter-button'
           },
-          onMixEnd: function(state) {
-            console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
-            const filterButtons = galleryContainer.querySelectorAll('.filter-button');
-            filterButtons.forEach(btn => btn.classList.remove('disabled'));
+          animation: {
+            duration: 400,
+            effects: 'fade scale(0.95)',
+            easing: 'ease-out',
+            queue: true
+          },
+          callbacks: {
+            onMixStart: function(state) {
+              console.log('Début du filtrage:', state.activeFilter.selector);
+              const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+              filterButtons.forEach(btn => btn.classList.add('disabled'));
+            },
+            onMixEnd: function(state) {
+              console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
+              const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+              filterButtons.forEach(btn => btn.classList.remove('disabled'));
+            },
+            onMixFail: function(state) {
+              console.error('Échec du filtrage:', state.activeFilter.selector);
+            }
           }
-        }
-      });
+        });
 
-      const filterButtons = galleryContainer.querySelectorAll('.filter-button');
-      filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          if (button.classList.contains('disabled')) {
-            console.log('Clic ignoré: bouton désactivé pendant l\'animation');
+        // Initialiser le filtre "all" après chargement
+        setTimeout(() => {
+          console.log('Initialisation du filtre par défaut: all');
+          mixer.filter('all').catch(err => {
+            console.error('Erreur lors de l\'initialisation du filtre:', err);
+          });
+        }, 100);
+
+        const filterButtons = galleryContainer.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            if (button.classList.contains('disabled')) {
+              console.log('Clic ignoré: bouton désactivé pendant l\'animation');
+              return;
+            }
+            const filter = button.getAttribute('data-filter');
+            console.log('Filtre cliqué:', filter);
+            filterButtons.forEach(btn => {
+              btn.classList.remove('active');
+              btn.setAttribute('aria-selected', 'false');
+            });
+            button.classList.add('active');
+            button.setAttribute('aria-selected', 'true');
+            try {
+              mixer.filter(filter === 'all' ? 'all' : filter);
+              console.log('Filtre appliqué:', filter);
+            } catch (err) {
+              console.error('Erreur lors de l\'application du filtre:', err);
+            }
+          });
+        });
+
+        // Vérifier l'état initial des éléments
+        console.log('Éléments de la grille:', Array.from(galleryItems).map(item => ({
+          classes: item.className,
+          visible: window.getComputedStyle(item).display !== 'none'
+        })));
+
+        // Lightbox
+        let lightbox = targetDocument.querySelector('.lightbox-overlay');
+        if (!lightbox) {
+          try {
+            lightbox = targetDocument.createElement('div');
+            lightbox.className = 'lightbox-overlay';
+            lightbox.id = 'global-lightbox';
+            lightbox.innerHTML = `
+              <button class="lightbox-close" title="Fermer">×</button>
+              <button class="lightbox-arrow prev" title="Précédente"><</button>
+              <img class="lightbox-img" src="" alt="">
+              <button class="lightbox-arrow next" title="Suivante">></button>
+              <div class="thumbnail-container"></div>
+            `;
+            targetBody.appendChild(lightbox);
+            console.log('Lightbox créé dans le DOM parent');
+          } catch (e) {
+            console.error('Erreur lors de la création du lightbox:', e);
             return;
           }
-          const filter = button.getAttribute('data-filter');
-          console.log('Filtre cliqué:', filter);
-          filterButtons.forEach(btn => {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-selected', 'false');
-          });
-          button.classList.add('active');
-          button.setAttribute('aria-selected', 'true');
-          mixer.filter(filter === 'all' ? 'all' : filter).catch(err => {
-            console.error('Erreur MixItUp:', err);
-          });
-        });
-      });
+        }
 
-      // Lightbox
-      let lightbox = targetDocument.querySelector('.lightbox-overlay');
-      if (!lightbox) {
-        try {
-          lightbox = targetDocument.createElement('div');
-          lightbox.className = 'lightbox-overlay';
-          lightbox.id = 'global-lightbox';
-          lightbox.innerHTML = `
-            <button class="lightbox-close" title="Fermer">×</button>
-            <button class="lightbox-arrow prev" title="Précédente"><</button>
-            <img class="lightbox-img" src="" alt="">
-            <button class="lightbox-arrow next" title="Suivante">></button>
-            <div class="thumbnail-container"></div>
-          `;
-          targetBody.appendChild(lightbox);
-          console.log('Lightbox créé dans le DOM parent');
-        } catch (e) {
-          console.error('Erreur lors de la création du lightbox:', e);
+        const lightboxImg = lightbox.querySelector('.lightbox-img');
+        const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
+        const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
+        const closeBtn = lightbox.querySelector('.lightbox-close');
+        const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
+        let currentIndex = 0;
+        let isAnimating = false;
+
+        if (!lightboxImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
+          console.error('Erreur : Éléments du lightbox manquants', { lightboxImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
           return;
         }
-      }
 
-      const lightboxImg = lightbox.querySelector('.lightbox-img');
-      const prevBtn = lightbox.querySelector('.lightbox-arrow.prev');
-      const nextBtn = lightbox.querySelector('.lightbox-arrow.next');
-      const closeBtn = lightbox.querySelector('.lightbox-close');
-      const thumbnailContainer = lightbox.querySelector('.thumbnail-container');
-      let currentIndex = 0;
-      let isAnimating = false;
-
-      if (!lightboxImg || !prevBtn || !nextBtn || !closeBtn || !thumbnailContainer) {
-        console.error('Erreur : Éléments du lightbox manquants', { lightboxImg, prevBtn, nextBtn, closeBtn, thumbnailContainer });
-        return;
-      }
-
-      function getVisibleImages() {
-        const visibleImages = Array.from(galleryItems).filter(item => {
-          const style = window.getComputedStyle(item);
-          return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
-        });
-        console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').src));
-        return visibleImages;
-      }
-
-      function updateThumbnails() {
-        const visibleImages = getVisibleImages();
-        thumbnailContainer.innerHTML = visibleImages.map((item, idx) => `
-          <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
-               src="${item.querySelector('img').src}" 
-               alt="${item.querySelector('img').alt}" 
-               data-index="${idx}">
-        `).join('');
-        thumbnailContainer.classList.add('active');
-        thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
-          thumb.addEventListener('click', () => {
-            if (!isAnimating) {
-              console.log('Clic sur vignette:', thumb.alt, 'Index:', thumb.getAttribute('data-index'));
-              showLightbox(parseInt(thumb.getAttribute('data-index')));
-            }
+        function getVisibleImages() {
+          const visibleImages = Array.from(galleryItems).filter(item => {
+            const style = window.getComputedStyle(item);
+            return style.display !== 'none' && !item.classList.contains('mixitup-hidden');
           });
-        });
-      }
-
-      function showLightbox(index) {
-        if (isAnimating || index < 0 || index >= getVisibleImages().length) {
-          console.warn('Animation en cours ou index hors limites:', index, isAnimating);
-          isAnimating = false;
-          return;
+          console.log('Images visibles:', visibleImages.map(item => item.querySelector('img').src));
+          return visibleImages;
         }
-        isAnimating = true;
-        const visibleImages = getVisibleImages();
-        currentIndex = index;
-        const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
-        const newAlt = visibleImages[currentIndex].querySelector('img').alt;
 
-        lightboxImg.classList.remove('active');
-        setTimeout(() => {
-          lightboxImg.src = newSrc;
-          lightboxImg.alt = newAlt;
-          lightboxImg.classList.add('active');
-          lightbox.classList.add('active');
-          updateThumbnails();
-          targetBody.style.overflow = 'hidden';
-          isAnimating = false;
-          console.log('Affichage image:', lightboxImg.alt, 'Index:', currentIndex);
-        }, 400);
-      }
-
-      galleryItems.forEach((item, idx) => {
-        const img = item.querySelector('img');
-        if (img) {
-          img.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('Clic sur image:', img.alt, 'Index:', idx);
-            const visibleImages = getVisibleImages();
-            const visibleIndex = visibleImages.indexOf(item);
-            if (visibleIndex !== -1 && !isAnimating) {
-              showLightbox(visibleIndex);
-            } else {
-              console.warn('Image non visible ou animation en cours:', visibleIndex, isAnimating);
-            }
+        function updateThumbnails() {
+          const visibleImages = getVisibleImages();
+          thumbnailContainer.innerHTML = visibleImages.map((item, idx) => `
+            <img class="thumbnail ${idx === currentIndex ? 'active' : ''}" 
+                 src="${item.querySelector('img').src}" 
+                 alt="${item.querySelector('img').alt}" 
+                 data-index="${idx}">
+          `).join('');
+          thumbnailContainer.classList.add('active');
+          thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
+            thumb.addEventListener('click', () => {
+              if (!isAnimating) {
+                console.log('Clic sur vignette:', thumb.alt, 'Index:', thumb.getAttribute('data-index'));
+                showLightbox(parseInt(thumb.getAttribute('data-index')));
+              }
+            });
           });
-        } else {
-          console.warn('Image manquante dans .gallery-item à l\'index:', idx);
         }
-      });
 
-      function closeLightbox() {
-        lightbox.classList.remove('active');
-        lightboxImg.classList.remove('active');
-        thumbnailContainer.classList.remove('active');
-        lightboxImg.src = '';
-        lightboxImg.alt = '';
-        thumbnailContainer.innerHTML = '';
-        targetBody.style.overflow = '';
-        isAnimating = false;
-        console.log('Lightbox fermé');
-      }
+        function showLightbox(index) {
+          if (isAnimating || index < 0 || index >= getVisibleImages().length) {
+            console.warn('Animation en cours ou index hors limites:', index, isAnimating);
+            isAnimating = false;
+            return;
+          }
+          isAnimating = true;
+          const visibleImages = getVisibleImages();
+          currentIndex = index;
+          const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
+          const newAlt = visibleImages[currentIndex].querySelector('img').alt;
 
-      function showPrev() {
-        if (isAnimating) return;
-        const visibleImages = getVisibleImages();
-        let idx = currentIndex - 1;
-        if (idx < 0) idx = visibleImages.length - 1;
-        if (visibleImages[idx]) {
-          console.log('Affichage image précédente:', idx);
-          showLightbox(idx);
+          lightboxImg.classList.remove('active');
+          setTimeout(() => {
+            lightboxImg.src = newSrc;
+            lightboxImg.alt = newAlt;
+            lightboxImg.classList.add('active');
+            lightbox.classList.add('active');
+            updateThumbnails();
+            targetBody.style.overflow = 'hidden';
+            isAnimating = false;
+            console.log('Affichage image:', lightboxImg.alt, 'Index:', currentIndex);
+          }, 400);
         }
-      }
 
-      function showNext() {
-        if (isAnimating) return;
-        const visibleImages = getVisibleImages();
-        let idx = currentIndex + 1;
-        if (idx >= visibleImages.length) idx = 0;
-        if (visibleImages[idx]) {
-          console.log('Affichage image suivante:', idx);
-          showLightbox(idx);
+        galleryItems.forEach((item, idx) => {
+          const img = item.querySelector('img');
+          if (img) {
+            img.addEventListener('click', (e) => {
+              e.stopPropagation();
+              console.log('Clic sur image:', img.alt, 'Index:', idx);
+              const visibleImages = getVisibleImages();
+              const visibleIndex = visibleImages.indexOf(item);
+              if (visibleIndex !== -1 && !isAnimating) {
+                showLightbox(visibleIndex);
+              } else {
+                console.warn('Image non visible ou animation en cours:', visibleIndex, isAnimating);
+              }
+            });
+          } else {
+            console.warn('Image manquante dans .gallery-item à l\'index:', idx);
+          }
+        });
+
+        function closeLightbox() {
+          lightbox.classList.remove('active');
+          lightboxImg.classList.remove('active');
+          thumbnailContainer.classList.remove('active');
+          lightboxImg.src = '';
+          lightboxImg.alt = '';
+          thumbnailContainer.innerHTML = '';
+          targetBody.style.overflow = '';
+          isAnimating = false;
+          console.log('Lightbox fermé');
         }
-      }
 
-      prevBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        console.log('Clic sur flèche précédente');
-        showPrev();
-      });
-
-      nextBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        console.log('Clic sur flèche suivante');
-        showNext();
-      });
-
-      closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        console.log('Clic sur bouton fermer');
-        closeLightbox();
-      });
-
-      lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) {
-          console.log('Clic sur l\'overlay pour fermer');
-          closeLightbox();
+        function showPrev() {
+          if (isAnimating) return;
+          const visibleImages = getVisibleImages();
+          let idx = currentIndex - 1;
+          if (idx < 0) idx = visibleImages.length - 1;
+          if (visibleImages[idx]) {
+            console.log('Affichage image précédente:', idx);
+            showLightbox(idx);
+          }
         }
-      });
 
-      targetDocument.addEventListener('keydown', (e) => {
-        if (!lightbox.classList.contains('active') || isAnimating) return;
-        if (e.key === 'Escape') {
-          console.log('Touche Échap pressée');
-          closeLightbox();
+        function showNext() {
+          if (isAnimating) return;
+          const visibleImages = getVisibleImages();
+          let idx = currentIndex + 1;
+          if (idx >= visibleImages.length) idx = 0;
+          if (visibleImages[idx]) {
+            console.log('Affichage image suivante:', idx);
+            showLightbox(idx);
+          }
         }
-        if (e.key === 'ArrowLeft') {
-          console.log('Touche flèche gauche pressée');
+
+        prevBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          console.log('Clic sur flèche précédente');
           showPrev();
-        }
-        if (e.key === 'ArrowRight') {
-          console.log('Touche flèche droite pressée');
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          console.log('Clic sur flèche suivante');
           showNext();
-        }
-      });
+        });
+
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          console.log('Clic sur bouton fermer');
+          closeLightbox();
+        });
+
+        lightbox.addEventListener('click', (e) => {
+          if (e.target === lightbox) {
+            console.log('Clic sur l\'overlay pour fermer');
+            closeLightbox();
+          }
+        });
+
+        targetDocument.addEventListener('keydown', (e) => {
+          if (!lightbox.classList.contains('active') || isAnimating) return;
+          if (e.key === 'Escape') {
+            console.log('Touche Échap pressée');
+            closeLightbox();
+          }
+          if (e.key === 'ArrowLeft') {
+            console.log('Touche flèche gauche pressée');
+            showPrev();
+          }
+          if (e.key === 'ArrowRight') {
+            console.log('Touche flèche droite pressée');
+            showNext();
+          }
+        });
+      } catch (e) {
+        console.error('Erreur lors de l\'initialisation de MixItUp:', e);
+      }
     };
     script.onerror = () => console.error('Erreur de chargement de MixItUp');
     localDocument.head.appendChild(script);
