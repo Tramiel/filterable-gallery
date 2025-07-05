@@ -1,5 +1,5 @@
 (function() {
-  function waitForElement(selector, callback, maxAttempts = 20, interval = 500) {
+  function waitForElement(selector, callback, maxAttempts = 30, interval = 500) {
     let attempts = 0;
     const check = () => {
       const element = document.querySelector(selector);
@@ -11,13 +11,36 @@
         console.log(`Conteneur ${selector} non trouvé, tentative ${attempts}/${maxAttempts}`);
         setTimeout(check, interval);
       } else {
-        console.error(`Conteneur ${selector} non trouvé après ${maxAttempts} tentatives`);
+        console.warn(`Conteneur ${selector} non trouvé après ${maxAttempts} tentatives, création d'un conteneur temporaire`);
+        const tempContainer = document.createElement('div');
+        tempContainer.className = 'custom-gallery';
+        document.body.appendChild(tempContainer);
+        console.log('Conteneur temporaire .custom-gallery créé');
+        callback(tempContainer);
       }
     };
     check();
   }
 
+  // Journaliser les conteneurs potentiels pour débogage
+  function logPotentialContainers() {
+    const selectors = ['.gallery', '.zyro-gallery', '[data-gallery]', '.widget-gallery', '[id*="gallery"]'];
+    selectors.forEach(sel => {
+      const elements = document.querySelectorAll(sel);
+      if (elements.length > 0) {
+        console.log(`Conteneurs potentiels trouvés pour ${sel}:`, Array.from(elements).map(el => ({
+          className: el.className,
+          id: el.id,
+          outerHTML: el.outerHTML.slice(0, 100) + '...'
+        })));
+      } else {
+        console.log(`Aucun conteneur trouvé pour ${sel}`);
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
+    logPotentialContainers();
     waitForElement('.custom-gallery', (galleryContainer) => {
       // Détecter si dans une iframe
       const isInIframe = window.self !== window.top;
@@ -411,7 +434,6 @@
                 console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
                 const filterButtons = galleryContainer.querySelectorAll('.filter-button');
                 filterButtons.forEach(btn => btn.classList.remove('disabled'));
-                // Vérifier l'état des éléments après filtrage
                 console.log('État des éléments après filtrage:', Array.from(galleryItems).map(item => ({
                   classes: item.className,
                   visible: !item.classList.contains('mixitup-hidden')
@@ -458,14 +480,12 @@
             });
           });
 
-          // Vérifier l'état initial des éléments
           console.log('Éléments de la grille avant initialisation:', Array.from(galleryItems).map(item => ({
             classes: item.className,
             visible: window.getComputedStyle(item).display !== 'none'
           })));
         } catch (e) {
           console.error('Erreur lors de l\'initialisation de MixItUp:', e);
-          // Logique de secours : filtrage manuel
           console.log('Tentative de filtrage manuel en secours');
           const filterButtons = galleryContainer.querySelectorAll('.filter-button');
           filterButtons.forEach(button => {
@@ -683,7 +703,6 @@
       };
       script.onerror = () => {
         console.error('Erreur de chargement de MixItUp');
-        // Logique de secours : filtrage manuel
         console.log('MixItUp non chargé, activation du filtrage manuel');
         const filterButtons = galleryContainer.querySelectorAll('.filter-button');
         filterButtons.forEach(button => {
