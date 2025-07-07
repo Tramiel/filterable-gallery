@@ -426,6 +426,45 @@
         console.log('Boutons de filtrage trouvés:', Array.from(filterButtons).map(btn => btn.getAttribute('data-filter')));
       }
 
+      function reenableButtons() {
+        filterButtons.forEach(btn => btn.classList.remove('disabled'));
+        console.log('Boutons réactivés');
+      }
+
+      function manualFilter(filter) {
+        console.log('Filtrage manuel déclenché pour:', filter);
+        const filterClass = filter === 'all' ? 'all' : filter.replace('.', '');
+        galleryItems.forEach(item => {
+          const isVisible = filter === 'all' || item.classList.contains(filterClass);
+          item.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important';
+          if (isVisible) {
+            item.style.opacity = '1 !important';
+            item.style.transform = 'none !important';
+            item.style.display = 'block !important';
+            item.classList.remove('mixitup-hidden');
+          } else {
+            item.style.opacity = '0 !important';
+            item.style.transform = 'scale(0.95) !important';
+            item.style.display = 'none !important';
+            item.classList.add('mixitup-hidden');
+          }
+          console.log('Élément:', {
+            className: item.className,
+            isVisible,
+            styles: {
+              display: window.getComputedStyle(item).display,
+              opacity: window.getComputedStyle(item).opacity,
+              transform: window.getComputedStyle(item).transform
+            }
+          });
+        });
+        console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
+          className: item.className,
+          display: window.getComputedStyle(item).display
+        })));
+        setTimeout(reenableButtons, 500);
+      }
+
       const script = localDocument.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
       script.onload = function() {
@@ -439,19 +478,18 @@
             animation: {
               duration: 400,
               effects: 'fade scale(0.95)',
-              easing: 'ease-out',
-              queue: true
+              easing: 'ease-out'
             },
             callbacks: {
               onMixStart: function(state) {
-                console.log('Début du filtrage:', state.activeFilter.selector);
+                console.log('Début du filtrage MixItUp:', state.activeFilter.selector);
                 filterButtons.forEach(btn => btn.classList.add('disabled'));
               },
               onMixEnd: function(state) {
-                console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
-                filterButtons.forEach(btn => btn.classList.remove('disabled'));
+                console.log('Fin du filtrage MixItUp:', state.activeFilter.selector);
+                reenableButtons();
                 const visibleItems = Array.from(galleryItems).filter(item => !item.classList.contains('mixitup-hidden'));
-                console.log('Éléments visibles après filtrage:', visibleItems.map(item => item.className));
+                console.log('Éléments visibles après filtrage MixItUp:', visibleItems.map(item => item.className));
               },
               onMixFail: function(state) {
                 console.error('Échec du filtrage MixItUp:', state.activeFilter.selector);
@@ -459,34 +497,7 @@
               }
             }
           });
-
-          function manualFilter(filter) {
-            console.log('Filtrage manuel déclenché pour:', filter);
-            const filterClass = filter === 'all' ? 'all' : filter.replace('.', '');
-            galleryItems.forEach(item => {
-              const isVisible = filter === 'all' || item.classList.contains(filterClass);
-              item.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important';
-              if (isVisible) {
-                item.style.opacity = '1 !important';
-                item.style.transform = 'none !important';
-                item.style.display = 'block !important';
-                item.classList.remove('mixitup-hidden');
-              } else {
-                item.style.opacity = '0 !important';
-                item.style.transform = 'scale(0.95) !important';
-                item.style.display = 'none !important';
-                item.classList.add('mixitup-hidden');
-              }
-            });
-            console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
-              className: item.className,
-              display: window.getComputedStyle(item).display
-            })));
-            setTimeout(() => {
-              filterButtons.forEach(btn => btn.classList.remove('disabled'));
-              console.log('Boutons réactivés après filtrage manuel');
-            }, 500);
-          }
+          console.log('MixItUp initialisé');
 
           setTimeout(() => {
             console.log('Initialisation du filtre par défaut: all');
@@ -513,6 +524,7 @@
               });
               button.classList.add('active');
               button.setAttribute('aria-selected', 'true');
+              filterButtons.forEach(btn => btn.classList.add('disabled'));
               try {
                 mixer.filter(filter);
                 console.log('Filtre appliqué via MixItUp:', filter);
@@ -520,6 +532,7 @@
                 console.error('Erreur lors de l\'application du filtre via MixItUp:', err);
                 manualFilter(filter);
               }
+              setTimeout(reenableButtons, 500);
             });
           });
         } catch (e) {
@@ -539,32 +552,12 @@
               });
               button.classList.add('active');
               button.setAttribute('aria-selected', 'true');
-              const filterClass = filter === 'all' ? 'all' : filter.replace('.', '');
-              galleryItems.forEach(item => {
-                const isVisible = filter === 'all' || item.classList.contains(filterClass);
-                item.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important';
-                if (isVisible) {
-                  item.style.opacity = '1 !important';
-                  item.style.transform = 'none !important';
-                  item.style.display = 'block !important';
-                  item.classList.remove('mixitup-hidden');
-                } else {
-                  item.style.opacity = '0 !important';
-                  item.style.transform = 'scale(0.95) !important';
-                  item.style.display = 'none !important';
-                  item.classList.add('mixitup-hidden');
-                }
-              });
-              console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
-                className: item.className,
-                display: window.getComputedStyle(item).display
-              })));
-              setTimeout(() => {
-                filterButtons.forEach(btn => btn.classList.remove('disabled'));
-                console.log('Boutons réactivés après filtrage manuel');
-              }, 500);
+              filterButtons.forEach(btn => btn.classList.add('disabled'));
+              manualFilter(filter);
+              setTimeout(reenableButtons, 500);
             });
           });
+          manualFilter('all');
         }
       };
       script.onerror = () => {
@@ -584,32 +577,12 @@
             });
             button.classList.add('active');
             button.setAttribute('aria-selected', 'true');
-            const filterClass = filter === 'all' ? 'all' : filter.replace('.', '');
-            galleryItems.forEach(item => {
-              const isVisible = filter === 'all' || item.classList.contains(filterClass);
-              item.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important';
-              if (isVisible) {
-                item.style.opacity = '1 !important';
-                item.style.transform = 'none !important';
-                item.style.display = 'block !important';
-                item.classList.remove('mixitup-hidden');
-              } else {
-                item.style.opacity = '0 !important';
-                item.style.transform = 'scale(0.95) !important';
-                item.style.display = 'none !important';
-                item.classList.add('mixitup-hidden');
-              }
-            });
-            console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
-              className: item.className,
-              display: window.getComputedStyle(item).display
-            })));
-            setTimeout(() => {
-              filterButtons.forEach(btn => btn.classList.remove('disabled'));
-              console.log('Boutons réactivés après filtrage manuel');
-            }, 500);
+            filterButtons.forEach(btn => btn.classList.add('disabled'));
+            manualFilter(filter);
+            setTimeout(reenableButtons, 500);
           });
         });
+        manualFilter('all');
       };
       localDocument.head.appendChild(script);
 
