@@ -46,14 +46,12 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     logPotentialContainers();
-    // Essayer plusieurs sélecteurs pour le conteneur
     const selectors = ['.custom-gallery', '.zyro-block-content', 'body'];
     let containerFound = false;
     selectors.forEach(sel => {
       if (!containerFound) {
         waitForElement(sel, (galleryContainer) => {
           containerFound = true;
-          // Vérifier les styles du conteneur
           const computedStyles = window.getComputedStyle(galleryContainer);
           console.log('Styles calculés du conteneur:', {
             className: galleryContainer.className,
@@ -63,18 +61,15 @@
             position: computedStyles.position
           });
 
-          // Forcer la visibilité
           galleryContainer.style.display = 'block !important';
           galleryContainer.style.visibility = 'visible !important';
           galleryContainer.style.position = 'relative !important';
 
-          // Détecter si dans une iframe
           const isInIframe = window.self !== window.top;
           const targetDocument = isInIframe ? window.parent.document : document;
           const targetBody = targetDocument.body;
           const localDocument = document;
 
-          // Injecter le CSS dans le DOM local
           const style = localDocument.createElement('style');
           style.textContent = `
             .custom-gallery {
@@ -343,7 +338,6 @@
           `;
           localDocument.head.appendChild(style);
 
-          // Injecter les styles du lightbox dans le DOM parent
           const parentStyle = targetDocument.createElement('style');
           parentStyle.setAttribute('data-gallery', 'true');
           parentStyle.textContent = style.textContent;
@@ -356,7 +350,6 @@
             console.error('Erreur lors de l\'injection des styles du lightbox:', e);
           }
 
-          // Injecter le HTML
           const altMap = {
             'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg': 'Étude de sol G5 - Expertise sinistre',
             'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg': 'Étude de sol G1 - Loi Elan',
@@ -417,7 +410,6 @@
           galleryContainer.classList.add('loaded');
           console.log('HTML de la galerie injecté');
 
-          // Vérifier l’état des éléments injectés
           const galleryGrid = galleryContainer.querySelector('.gallery-grid');
           const filterButtons = galleryContainer.querySelectorAll('.filter-button');
           const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
@@ -432,7 +424,6 @@
             } : 'N/A'
           });
 
-          // Précharger les images pleine résolution
           if (galleryItems.length === 0) {
             console.warn('Aucun .gallery-item trouvé dans .gallery-grid');
           } else {
@@ -453,14 +444,12 @@
             console.log('Images préchargées:', preloadImages);
           }
 
-          // Vérifier les boutons de filtrage
           if (filterButtons.length === 0) {
             console.warn('Aucun .filter-button trouvé dans .filter-buttons');
           } else {
             console.log('Boutons de filtrage trouvés:', Array.from(filterButtons).map(btn => btn.getAttribute('data-filter')));
           }
 
-          // Charger MixItUp
           const script = localDocument.createElement('script');
           script.src = 'https://cdn.jsdelivr.net/npm/mixitup@3.3.1/dist/mixitup.min.js';
           script.onload = function() {
@@ -490,7 +479,6 @@
                       className: item.className,
                       display: window.getComputedStyle(item).display
                     })));
-                    // Vérifier si le filtrage a fonctionné
                     if (state.activeFilter.selector !== 'all' && visibleItems.length === galleryItems.length) {
                       console.warn('MixItUp n\'a pas filtré correctement, activation du filtrage manuel');
                       manualFilter(state.activeFilter.selector);
@@ -503,7 +491,6 @@
                 }
               });
 
-              // Fonction de filtrage manuel
               function manualFilter(filter) {
                 console.log('Filtrage manuel déclenché pour:', filter);
                 galleryItems.forEach(item => {
@@ -527,7 +514,6 @@
                 })));
               }
 
-              // Initialiser le filtre "all" après un délai
               setTimeout(() => {
                 console.log('Initialisation du filtre par défaut: all');
                 try {
@@ -648,7 +634,6 @@
           };
           localDocument.head.appendChild(script);
 
-          // Lightbox
           let lightbox = targetDocument.querySelector('.lightbox-overlay');
           if (!lightbox) {
             try {
@@ -830,7 +815,6 @@
             }
           });
 
-          // Ajuster la hauteur du iframe
           if (isInIframe) {
             const updateHeight = () => {
               const height = galleryContainer.offsetHeight;
