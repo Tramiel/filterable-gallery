@@ -25,28 +25,10 @@
     check();
   }
 
-  // Journaliser les conteneurs potentiels pour débogage
-  function logPotentialContainers() {
-    const selectors = ['.gallery', '.zyro-gallery', '[data-gallery]', '.widget-gallery', '[id*="gallery"]', '.zyro-block-content', '[id*="block"]'];
-    selectors.forEach(sel => {
-      const elements = document.querySelectorAll(sel);
-      if (elements.length > 0) {
-        console.log(`Conteneurs potentiels trouvés pour ${sel}:`, Array.from(elements).map(el => ({
-          className: el.className,
-          id: el.id,
-          outerHTML: el.outerHTML.slice(0, 100) + '...',
-          display: window.getComputedStyle(el).display,
-          visibility: window.getComputedStyle(el).visibility
-        })));
-      } else {
-        console.log(`Aucun conteneur trouvé pour ${sel}`);
-      }
-    });
-  }
-
   document.addEventListener('DOMContentLoaded', function() {
-    logPotentialContainers();
+    // Journaliser les conteneurs potentiels pour débogage
     const selectors = ['.custom-gallery', '.zyro-block-content', 'body'];
+    console.log('Recherche des conteneurs potentiels:', selectors);
     let containerFound = false;
     selectors.forEach(sel => {
       if (!containerFound) {
@@ -475,14 +457,7 @@
                     console.log('Fin du filtrage, éléments visibles:', state.activeFilter.selector);
                     filterButtons.forEach(btn => btn.classList.remove('disabled'));
                     const visibleItems = Array.from(galleryItems).filter(item => !item.classList.contains('mixitup-hidden'));
-                    console.log('Éléments visibles après filtrage:', visibleItems.map(item => ({
-                      className: item.className,
-                      display: window.getComputedStyle(item).display
-                    })));
-                    if (state.activeFilter.selector !== 'all' && visibleItems.length === galleryItems.length) {
-                      console.warn('MixItUp n\'a pas filtré correctement, activation du filtrage manuel');
-                      manualFilter(state.activeFilter.selector);
-                    }
+                    console.log('Éléments visibles après filtrage:', visibleItems.map(item => item.className));
                   },
                   onMixFail: function(state) {
                     console.error('Échec du filtrage:', state.activeFilter.selector);
@@ -508,10 +483,7 @@
                     item.classList.add('mixitup-hidden');
                   }
                 });
-                console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
-                  className: item.className,
-                  display: window.getComputedStyle(item).display
-                })));
+                console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => item.className));
               }
 
               setTimeout(() => {
@@ -548,11 +520,6 @@
                   }
                 });
               });
-
-              console.log('Éléments de la grille avant initialisation:', Array.from(galleryItems).map(item => ({
-                className: item.className,
-                display: window.getComputedStyle(item).display
-              })));
             } catch (e) {
               console.error('Erreur lors de l\'initialisation de MixItUp:', e);
               console.log('MixItUp non initialisé, activation du filtrage manuel');
@@ -585,10 +552,7 @@
                       item.classList.add('mixitup-hidden');
                     }
                   });
-                  console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
-                    className: item.className,
-                    display: window.getComputedStyle(item).display
-                  })));
+                  console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => item.className));
                 });
               });
             }
@@ -625,10 +589,7 @@
                     item.classList.add('mixitup-hidden');
                   }
                 });
-                console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => ({
-                  className: item.className,
-                  display: window.getComputedStyle(item).display
-                })));
+                console.log('État des éléments après filtrage manuel:', Array.from(galleryItems).map(item => item.className));
               });
             });
           };
@@ -819,7 +780,7 @@
             const updateHeight = () => {
               const height = galleryContainer.offsetHeight;
               try {
-                window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zhl_XD' }, '*');
+                window.parent.postMessage({ action: 'iframeHeightUpdated', height, id: 'zk3gro' }, '*');
                 console.log('Hauteur iframe mise à jour:', height);
               } catch (e) {
                 console.error('Erreur lors de l\'envoi de la hauteur iframe:', e);
@@ -829,7 +790,7 @@
             updateHeight();
           }
         });
-      });
+      }
     });
   });
 })();
