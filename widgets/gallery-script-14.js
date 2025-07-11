@@ -147,7 +147,7 @@
         bottom: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        background: rgba(0, 0, 0, 0.85) !important;
+        background: rgba(0, 0, 0, 0.9) !important;
         justify-content: center;
         align-items: center;
         z-index: 999999 !important;
@@ -164,22 +164,14 @@
         max-height: 70vh !important;
         object-fit: contain !important;
         border-radius: 8px !important;
-        box-shadow: 0 0 30px #111 !important;
         display: block !important;
         margin: 0 auto !important;
         opacity: 0;
-        transform: scale(0.8) translateX(0);
-        transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: scale(0.8);
       }
       .lightbox-img.active {
         opacity: 1;
-        transform: scale(1) translateX(0);
-      }
-      .lightbox-img.from-left {
-        transform: translateX(-200px);
-      }
-      .lightbox-img.from-right {
-        transform: translateX(200px);
+        transform: scale(1);
       }
       .lightbox-caption {
         color: #fff !important;
@@ -292,24 +284,28 @@
         <div class="gallery-item mix sols">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
                data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg"
+               alt="Expertise sinistre argiles - Haute-Garonne"
                data-caption="Expertise sinistre argiles - Haute-Garonne">
           <div class="caption">Expertise sinistre argiles - Haute-Garonne</div>
         </div>
         <div class="gallery-item mix elan">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
                data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg"
+               alt="Étude de sol G1 - Loi Elan"
                data-caption="Étude de sol G1 - Loi Elan">
           <div class="caption">Étude de sol G1 - Loi Elan</div>
         </div>
         <div class="gallery-item mix assainissement">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
                data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg"
+               alt="Étude de sol - Assainissement"
                data-caption="Étude de sol - Assainissement">
           <div class="caption">Étude de sol - Assainissement</div>
         </div>
         <div class="gallery-item mix references">
           <img src="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg"
                data-full="https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg"
+               alt="Fondations restaurant scolaire - Tarn"
                data-caption="Fondations restaurant scolaire - Tarn">
           <div class="caption">Fondations restaurant scolaire - Tarn</div>
         </div>
@@ -348,22 +344,15 @@
               grid.parentNode.insertBefore(wrapper, grid);
               wrapper.appendChild(grid);
 
-              // GSAP animation for visible items
-              gsap.to('.gallery-item:not(.mixitup-hidden)', {
+              // GSAP animation for visible items only
+              const visibleItems = galleryContainer.querySelectorAll('.gallery-item:not(.mixitup-hidden)');
+              gsap.to(visibleItems, {
                 opacity: 1,
                 y: 0,
                 scale: 1,
                 duration: 0.5,
                 ease: 'power2.out',
                 stagger: 0.05
-              });
-              // GSAP animation for hidden items
-              gsap.to('.gallery-item.mixitup-hidden', {
-                opacity: 0,
-                y: 30,
-                scale: 0.95,
-                duration: 0.5,
-                ease: 'power2.in'
               });
             },
             onMixEnd: function() {
@@ -454,52 +443,24 @@
           const newAlt = visibleImages[currentIndex].querySelector('img').alt;
           const newCaption = visibleImages[currentIndex].querySelector('img').getAttribute('data-caption') || '';
 
-          // Get the clicked image's position and size
-          const clickedItem = visibleImages[currentIndex];
-          const rect = clickedItem.getBoundingClientRect();
-          const scrollTop = window.scrollY || document.documentElement.scrollTop;
-          const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-
-          lightboxImg.classList.remove('active', 'from-left', 'from-right');
+          lightboxImg.classList.remove('active');
           lightboxCaption.classList.remove('active');
           thumbnailContainer.classList.remove('active');
 
-          // Set initial position and size to match the clicked image
-          gsap.set(lightboxImg, {
-            x: rect.left + scrollLeft,
-            y: rect.top + scrollTop,
-            width: rect.width,
-            height: rect.height,
-            opacity: 1
-          });
-
+          gsap.set(lightboxImg, { opacity: 0, scale: 0.8, x: direction === 'prev' ? -200 : direction === 'next' ? 200 : 0 });
           setTimeout(() => {
             lightboxImg.src = newSrc;
             lightboxImg.alt = newAlt;
             lightboxCaption.textContent = newCaption;
 
-            // Animate to full-screen position
             gsap.to(lightboxImg, {
-              x: 0,
-              y: 0,
-              width: '90vw',
-              height: '70vh',
               opacity: 1,
+              scale: 1,
+              x: 0,
               duration: 0.5,
               ease: 'power2.out',
               onComplete: () => {
                 lightboxImg.classList.add('active');
-                if (direction === 'prev') {
-                  gsap.fromTo(lightboxImg, 
-                    { x: -200 },
-                    { x: 0, duration: 0.5, ease: 'power2.out' }
-                  );
-                } else if (direction === 'next') {
-                  gsap.fromTo(lightboxImg, 
-                    { x: 200 },
-                    { x: 0, duration: 0.5, ease: 'power2.out' }
-                  );
-                }
                 lightboxCaption.classList.add('active');
                 thumbnailContainer.classList.add('active');
                 isAnimating = false;
@@ -526,29 +487,23 @@
         });
 
         function closeLightbox() {
-          const rect = galleryItems[currentIndex].getBoundingClientRect();
-          const scrollTop = window.scrollY || document.documentElement.scrollTop;
-          const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-
-          gsap.to(lightboxImg, {
-            x: rect.left + scrollLeft,
-            y: rect.top + scrollTop,
-            width: rect.width,
-            height: rect.height,
+          gsap.to([lightboxImg, lightboxCaption, thumbnailContainer], {
             opacity: 0,
+            scale: lightboxImg ? 0.8 : 1,
+            y: lightboxCaption || thumbnailContainer ? 20 : 0,
             duration: 0.5,
             ease: 'power2.in',
             onComplete: () => {
               lightbox.classList.remove('active');
               lightboxImg.src = '';
               lightboxImg.alt = '';
-              lightboxImg.classList.remove('active', 'from-left', 'from-right');
+              lightboxImg.classList.remove('active');
               lightboxCaption.classList.remove('active');
               lightboxCaption.textContent = '';
               thumbnailContainer.classList.remove('active');
               thumbnailContainer.innerHTML = '';
               targetBody.style.overflow = '';
-              gsap.set(lightboxImg, { clearProps: 'all' });
+              gsap.set([lightboxImg, lightboxCaption, thumbnailContainer], { clearProps: 'all' });
               isAnimating = false;
             }
           });
