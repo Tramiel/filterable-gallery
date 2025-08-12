@@ -256,7 +256,7 @@
         transform: translate(-50%, -50%) rotate(-45deg);
       }
       /* Option 1 : Légende entre l’image et les thumbnails */
-      .lightbox-caption {
+      /*.lightbox-caption {
         color: #fff !important;
         font-size: 16px !important;
         text-align: center !important;
@@ -268,9 +268,9 @@
       .lightbox-overlay.active .lightbox-caption {
         opacity: 1;
       }
+      */
       /* Option 2 : Légende en bas de l’image dans une bande semi-transparente */
       /* Décommenter pour activer l’Option 2, commenter l’Option 1 */
-      /*
       .lightbox-caption {
         position: absolute !important;
         bottom: 0 !important;
@@ -290,7 +290,7 @@
       .lightbox-overlay.active .lightbox-caption {
         opacity: 1;
       }
-      */
+
       @media only screen and (max-width: 400px) {
         .gallery-grid {
           grid-template-columns: 1fr !important;
