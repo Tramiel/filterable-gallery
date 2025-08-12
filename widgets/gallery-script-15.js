@@ -150,14 +150,21 @@
       .lightbox-overlay.active {
         display: flex !important;
       }
-      .lightbox-img {
+      .lightbox-image-container {
+        position: relative;
         max-width: 90vw !important;
+        max-height: 70vh !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .lightbox-img {
+        max-width: 100% !important;
         max-height: 70vh !important;
         object-fit: contain !important;
         border-radius: 8px !important;
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
-        margin: 0 auto !important;
         opacity: 0;
         transition: opacity 0.2s ease !important;
       }
@@ -255,8 +262,29 @@
         background: #222;
         transform: translate(-50%, -50%) rotate(-45deg);
       }
-      /* Option 1 : Légende entre l’image et les thumbnails */
-      /*.lightbox-caption {
+      /* Option 2 : Légende en bas de l’image dans une bande semi-transparente */
+      .lightbox-caption {
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        color: #fff !important;
+        font-size: 16px !important;
+        text-align: center !important;
+        padding: 10px !important;
+        max-width: 100% !important;
+        border-bottom-left-radius: 8px !important;
+        border-bottom-right-radius: 8px !important;
+        opacity: 0;
+        transition: opacity 0.2s ease !important;
+      }
+      .lightbox-overlay.active .lightbox-caption {
+        opacity: 1;
+      }
+      /* Option 1 : Légende entre l’image et les thumbnails (commentée) */
+      /*
+      .lightbox-caption {
         color: #fff !important;
         font-size: 16px !important;
         text-align: center !important;
@@ -269,28 +297,6 @@
         opacity: 1;
       }
       */
-      /* Option 2 : Légende en bas de l’image dans une bande semi-transparente */
-      /* Décommenter pour activer l’Option 2, commenter l’Option 1 */
-      .lightbox-caption {
-        position: absolute !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        background: rgba(0, 0, 0, 0.7) !important;
-        color: #fff !important;
-        font-size: 16px !important;
-        text-align: center !important;
-        padding: 10px !important;
-        max-width: 90vw !important;
-        border-bottom-left-radius: 8px !important;
-        border-bottom-right-radius: 8px !important;
-        opacity: 0;
-        transition: opacity 0.2s ease !important;
-      }
-      .lightbox-overlay.active .lightbox-caption {
-        opacity: 1;
-      }
-
       @media only screen and (max-width: 400px) {
         .gallery-grid {
           grid-template-columns: 1fr !important;
@@ -404,8 +410,10 @@
         lightbox.innerHTML = `
           <button class="lightbox-close" title="Fermer" aria-label="Fermer la visionneuse"></button>
           <button class="lightbox-arrow prev" title="Précédente" aria-label="Image précédente"></button>
-          <img class="lightbox-img" src="" alt="">
-          <div class="lightbox-caption"></div>
+          <div class="lightbox-image-container">
+            <img class="lightbox-img" src="" alt="">
+            <div class="lightbox-caption"></div>
+          </div>
           <button class="lightbox-arrow next" title="Suivante" aria-label="Image suivante"></button>
           <div class="thumbnail-container"></div>
         `;
