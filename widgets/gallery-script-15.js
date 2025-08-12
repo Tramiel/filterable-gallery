@@ -148,9 +148,13 @@
         z-index: 1000000 !important;
         transition: background 0.2s, transform 0.2s !important;
       }
-      .lightbox-arrow:hover, .lightbox-close:hover {
+      .lightbox-arrow:hover {
         background: #fff !important;
         transform: translateY(-50%) scale(1.1) !important;
+      }
+      .lightbox-close:hover {
+        background: #fff !important;
+        transform: scale(1.1) !important;
       }
       .lightbox-arrow.prev {
         left: 2vw !important;
