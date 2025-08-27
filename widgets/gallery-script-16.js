@@ -11,21 +11,21 @@
     const targetBody = targetDocument.body;
     const localDocument = document;
 
-    // Liste des images avec captions pour la lightbox
+    // Liste des images avec captions pour la lightbox et le hover
     const images = [
       {
         src: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg',
         fullSrc: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg',
         alt: 'Expertise sinistre argiles - Haute-Garonne',
-        title: 'Expertise de sol pour sinistre lié aux argiles, Haute-Garonne',
+        title: 'Expertise sinistre argiles - Haute-Garonne',
         caption: 'Expertise de sol pour sinistre lié aux argiles, Haute-Garonne',
-        category: 'sols'
+        category: 'sondages'
       },
       {
         src: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg',
         fullSrc: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg',
         alt: 'Étude de sol G1 - Loi Elan',
-        title: 'Étude géotechnique G1 pour vente de terrain, Loi Elan',
+        title: 'Étude de sol G1 - Loi Elan',
         caption: 'Étude géotechnique G1 pour vente de terrain, Loi Elan',
         category: 'elan'
       },
@@ -33,7 +33,7 @@
         src: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg',
         fullSrc: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sol_assainissement-mk3J87wjlaco54Om.jpg',
         alt: 'Étude de sol - Assainissement',
-        title: 'Étude de sol pour système d’assainissement',
+        title: 'Étude de sol - Assainissement',
         caption: 'Étude de sol pour système d’assainissement',
         category: 'assainissement'
       },
@@ -41,7 +41,7 @@
         src: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg',
         fullSrc: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g2-fondations-restaurant-scolaire-le-sequestre-tarn-YX4x18Ee21upqzjP.jpg',
         alt: 'Fondations restaurant scolaire - Tarn',
-        title: 'Étude G2 pour fondations de restaurant scolaire, Le Séquestre, Tarn',
+        title: 'Fondations restaurant scolaire - Tarn',
         caption: 'Étude G2 pour fondations de restaurant scolaire, Le Séquestre, Tarn',
         category: 'references'
       }
@@ -51,9 +51,10 @@
     galleryContainer.innerHTML = `
       <div class="filter-buttons" role="tablist">
         <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Voir tout</button>
-        <button class="filter-button" data-filter=".sols" role="tab" aria-selected="false">Etudes de Sols</button>
+        <button class="filter-button" data-filter=".sondages" role="tab" aria-selected="false">Etudes de Sols</button>
         <button class="filter-button" data-filter=".elan" role="tab" aria-selected="false">Loi Elan</button>
         <button class="filter-button" data-filter=".assainissement" role="tab" aria-selected="false">Assainissement</button>
+        <button class="filter-button" data-filter=".expertises" role="tab" aria-selected="false">Expertises</button>
         <button class="filter-button" data-filter=".references" role="tab" aria-selected="false">Références</button>
       </div>
       <div class="gallery-grid">
@@ -149,6 +150,7 @@
         padding: 10px !important;
         opacity: 0;
         transition: opacity 0.3s ease !important;
+        font-family: arial;
       }
       .gallery-item:hover .hover-caption {
         opacity: 1;
@@ -171,14 +173,21 @@
       .lightbox-overlay.active {
         display: flex !important;
       }
-      .lightbox-img {
+      .lightbox-image-container {
+        position: relative;
         max-width: 90vw !important;
+        max-height: 70vh !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .lightbox-img {
+        max-width: 100% !important;
         max-height: 70vh !important;
         object-fit: contain !important;
         border-radius: 8px !important;
         box-shadow: 0 0 30px #111 !important;
         display: block !important;
-        margin: 0 auto !important;
         opacity: 0;
         transition: opacity 0.2s ease !important;
       }
@@ -198,7 +207,7 @@
         width: 100px !important;
         height: 75px !important;
         object-fit: cover !important;
-        border-radius: 4px !important;
+        border-radius: 2px !important;
         cursor: pointer !important;
         opacity: 0.6 !important;
         transition: opacity 0.3s !important;
@@ -221,7 +230,11 @@
         z-index: 1000000 !important;
         transition: background 0.2s, transform 0.2s !important;
       }
-      .lightbox-arrow:hover, .lightbox-close:hover {
+      .lightbox-arrow:hover {
+        background: #fff !important;
+        transform: translateY(-50%) scale(1.1) !important;
+      }
+      .lightbox-close:hover {
         background: #fff !important;
         transform: scale(1.1) !important;
       }
@@ -263,16 +276,16 @@
         width: 20px;
         height: 2px;
         background: #222;
-        transform: translate(-50%, -50%) rotate(45deg);
+        transform: translate(-30%, -50%) rotate(135deg);
       }
       .lightbox-close::after {
         content: '';
         width: 20px;
         height: 2px;
         background: #222;
-        transform: translate(-50%, -50%) rotate(-45deg);
+        transform: translate(-65%, -50%) rotate(-45deg);
       }
-      /* Option 2 : Légende en bas de l’image avec fond semi-transparent */
+      /* Option 2 : Légende en bas de l’image dans une bande semi-transparente */
       .lightbox-caption {
         position: absolute !important;
         bottom: 0 !important;
@@ -280,7 +293,8 @@
         right: 0 !important;
         background: rgba(0, 0, 0, 0.7) !important;
         color: #fff !important;
-        font-size: 16px !important;
+        font-family: arial;
+        font-size: 20px !important;
         text-align: center !important;
         padding: 10px !important;
         max-width: 100% !important;
@@ -319,6 +333,10 @@
         }
         .lightbox-caption {
           font-size: 14px !important;
+          padding: 8px !important;
+        }
+        .hover-caption {
+          font-size: 12px !important;
           padding: 8px !important;
         }
       }
