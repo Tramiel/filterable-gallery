@@ -11,7 +11,7 @@
     const targetBody = targetDocument.body;
     const localDocument = document;
 
-    // Liste des images avec captions pour la lightbox et le hover
+    // Liste des images avec captions et title pour la lightbox et le hover
     const images = [
       {
         src: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-expertise-sinistre-argiles-secheresse-g5-haute-garonne-m6LbPK76LlTkVVwe.jpg',
@@ -19,7 +19,7 @@
         alt: 'Expertise sinistre argiles - Haute-Garonne',
         title: 'Expertise sinistre argiles - Haute-Garonne',
         caption: 'Expertise de sol pour sinistre lié aux argiles, Haute-Garonne',
-        category: 'sondages'
+        category: 'sols'
       },
       {
         src: 'https://assets.zyrosite.com/YBgbqOylE1CXEOa3/etude-sols-g1-loi-elan-vente-terrain-geotechnique-haute-garonne-AE0r2VnBxoHRLzvl.jpg',
@@ -47,20 +47,19 @@
       }
     ];
 
-    // Générer le HTML de la galerie avec caption au hover
+    // Générer le HTML de la galerie avec caption au hover et title
     galleryContainer.innerHTML = `
       <div class="filter-buttons" role="tablist">
         <button class="filter-button active" data-filter="all" role="tab" aria-selected="true">Voir tout</button>
-        <button class="filter-button" data-filter=".sondages" role="tab" aria-selected="false">Etudes de Sols</button>
+        <button class="filter-button" data-filter=".sols" role="tab" aria-selected="false">Etudes de Sols</button>
         <button class="filter-button" data-filter=".elan" role="tab" aria-selected="false">Loi Elan</button>
         <button class="filter-button" data-filter=".assainissement" role="tab" aria-selected="false">Assainissement</button>
-        <button class="filter-button" data-filter=".expertises" role="tab" aria-selected="false">Expertises</button>
         <button class="filter-button" data-filter=".references" role="tab" aria-selected="false">Références</button>
       </div>
       <div class="gallery-grid">
         ${images.map(img => `
           <div class="gallery-item mix ${img.category}">
-            <img src="${img.src}" data-full="${img.fullSrc}" alt="${img.alt}" data-caption="${img.caption}">
+            <img src="${img.src}" data-full="${img.fullSrc}" alt="${img.alt}" title="${img.title}" data-caption="${img.caption}">
             <div class="hover-caption">${img.caption}</div>
           </div>
         `).join('')}
@@ -207,7 +206,7 @@
         width: 100px !important;
         height: 75px !important;
         object-fit: cover !important;
-        border-radius: 2px !important;
+        border-radius: 4px !important;
         cursor: pointer !important;
         opacity: 0.6 !important;
         transition: opacity 0.3s !important;
@@ -230,11 +229,7 @@
         z-index: 1000000 !important;
         transition: background 0.2s, transform 0.2s !important;
       }
-      .lightbox-arrow:hover {
-        background: #fff !important;
-        transform: translateY(-50%) scale(1.1) !important;
-      }
-      .lightbox-close:hover {
+      .lightbox-arrow:hover, .lightbox-close:hover {
         background: #fff !important;
         transform: scale(1.1) !important;
       }
@@ -263,27 +258,27 @@
         height: 12px;
         border: solid #222;
         border-width: 0 3px 3px 0;
-        transform: translate(-30%, -50%) rotate(135deg);
+        transform: translate(-50%, -50%) rotate(135deg);
       }
       .lightbox-arrow.next::before {
         width: 12px;
         height: 12px;
         border: solid #222;
         border-width: 0 3px 3px 0;
-        transform: translate(-65%, -50%) rotate(-45deg);
+        transform: translate(-50%, -50%) rotate(-45deg);
       }
       .lightbox-close::before {
         width: 20px;
         height: 2px;
         background: #222;
-        transform: translate(-50%, -50%) rotate(-45deg);
+        transform: translate(-50%, -50%) rotate(45deg);
       }
       .lightbox-close::after {
         content: '';
         width: 20px;
         height: 2px;
         background: #222;
-        transform: translate(-50%, -50%) rotate(45deg);
+        transform: translate(-50%, -50%) rotate(-45deg);
       }
       /* Option 2 : Légende en bas de l’image dans une bande semi-transparente */
       .lightbox-caption {
@@ -293,8 +288,7 @@
         right: 0 !important;
         background: rgba(0, 0, 0, 0.7) !important;
         color: #fff !important;
-        font-family: arial;
-        font-size: 20px !important;
+        font-size: 16px !important;
         text-align: center !important;
         padding: 10px !important;
         max-width: 100% !important;
@@ -474,6 +468,7 @@
           <img class="thumbnail ${idx === currentIndex ? 'active' : ''}"
                src="${item.querySelector('img').src}"
                alt="${item.querySelector('img').alt}"
+               title="${item.querySelector('img').title}"
                data-index="${idx}">
         `).join('');
         thumbnailContainer.querySelectorAll('.thumbnail').forEach(thumb => {
@@ -495,6 +490,7 @@
         currentIndex = index;
         const newSrc = visibleImages[currentIndex].querySelector('img').getAttribute('data-full');
         const newAlt = visibleImages[currentIndex].querySelector('img').alt;
+        const newTitle = visibleImages[currentIndex].querySelector('img').title;
         const newCaption = visibleImages[currentIndex].querySelector('img').getAttribute('data-caption');
 
         lightboxImg.classList.remove('active');
@@ -502,6 +498,7 @@
         setTimeout(() => {
           lightboxImg.src = newSrc;
           lightboxImg.alt = newAlt;
+          lightboxImg.title = newTitle;
           lightboxCaption.textContent = newCaption;
           lightboxImg.classList.add('active');
           lightboxCaption.style.opacity = '1';
@@ -531,6 +528,7 @@
         lightbox.classList.remove('active');
         lightboxImg.src = '';
         lightboxImg.alt = '';
+        lightboxImg.title = '';
         lightboxCaption.textContent = '';
         lightboxImg.classList.remove('active');
         thumbnailContainer.innerHTML = '';
