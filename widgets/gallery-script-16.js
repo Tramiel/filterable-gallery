@@ -229,7 +229,11 @@
         z-index: 1000000 !important;
         transition: background 0.2s, transform 0.2s !important;
       }
-      .lightbox-arrow:hover, .lightbox-close:hover {
+      .lightbox-arrow:hover {
+        background: #fff !important;
+        transform: translateY(-50%) scale(1.1) !important;
+      }
+      .lightbox-close:hover {
         background: #fff !important;
         transform: scale(1.1) !important;
       }
@@ -265,7 +269,7 @@
         height: 12px;
         border: solid #222;
         border-width: 0 3px 3px 0;
-        transform: translate(-50%, -50%) rotate(-45deg);
+        transform: translate(-30%, -50%) rotate(-45deg);
       }
       .lightbox-close::before {
         width: 20px;
@@ -278,7 +282,7 @@
         width: 20px;
         height: 2px;
         background: #222;
-        transform: translate(-50%, -50%) rotate(-45deg);
+        transform: translate(-65%, -50%) rotate(-45deg);
       }
       /* Option 2 : Légende en bas de l’image dans une bande semi-transparente */
       .lightbox-caption {
