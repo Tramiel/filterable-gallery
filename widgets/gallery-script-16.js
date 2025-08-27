@@ -262,14 +262,14 @@
         height: 12px;
         border: solid #222;
         border-width: 0 3px 3px 0;
-        transform: translate(-50%, -50%) rotate(135deg);
+        transform: translate(-30%, -50%) rotate(135deg);
       }
       .lightbox-arrow.next::before {
         width: 12px;
         height: 12px;
         border: solid #222;
         border-width: 0 3px 3px 0;
-        transform: translate(-30%, -50%) rotate(-45deg);
+        transform: translate(-65%, -50%) rotate(-45deg);
       }
       .lightbox-close::before {
         width: 20px;
@@ -282,7 +282,7 @@
         width: 20px;
         height: 2px;
         background: #222;
-        transform: translate(-65%, -50%) rotate(-45deg);
+        transform: translate(-50%, -50%) rotate(-45deg);
       }
       /* Option 2 : Légende en bas de l’image dans une bande semi-transparente */
       .lightbox-caption {
